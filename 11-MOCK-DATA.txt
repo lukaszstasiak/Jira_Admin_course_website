@@ -1,0 +1,202 @@
+================================================================================
+JIRA SIMULATOR MOCK DATA
+Place in: config/simulator/mock-data.json
+================================================================================
+
+{
+  "users": [
+    { "id": "user-1", "name": "Alex Morgan", "email": "alex@example.com", "avatar": "/avatars/alex.jpg" },
+    { "id": "user-2", "name": "Jordan Lee", "email": "jordan@example.com", "avatar": "/avatars/jordan.jpg" },
+    { "id": "user-3", "name": "Sam Chen", "email": "sam@example.com", "avatar": "/avatars/sam.jpg" },
+    { "id": "user-4", "name": "Taylor Kim", "email": "taylor@example.com", "avatar": "/avatars/taylor.jpg" }
+  ],
+
+  "projects": [
+    { "id": "proj-1", "key": "DEMO", "name": "Demo Project", "type": "software", "lead": "user-1" },
+    { "id": "proj-2", "key": "MOBILE", "name": "Mobile App", "type": "software", "lead": "user-2" }
+  ],
+
+  "epics": [
+    { "id": "epic-1", "key": "DEMO-100", "name": "User Authentication", "color": "#8270DB" },
+    { "id": "epic-2", "key": "DEMO-101", "name": "Dashboard Redesign", "color": "#22A06B" },
+    { "id": "epic-3", "key": "DEMO-102", "name": "API Integration", "color": "#0055CC" }
+  ],
+
+  "sprints": [
+    { "id": "sprint-1", "name": "Sprint 23", "status": "active", "startDate": "2025-01-13", "endDate": "2025-01-27" },
+    { "id": "sprint-2", "name": "Sprint 24", "status": "future", "startDate": "2025-01-27", "endDate": "2025-02-10" }
+  ],
+
+  "columns": [
+    { "id": "col-1", "name": "TO DO", "status": "todo" },
+    { "id": "col-2", "name": "IN PROGRESS", "status": "in-progress" },
+    { "id": "col-3", "name": "IN REVIEW", "status": "in-review" },
+    { "id": "col-4", "name": "DONE", "status": "done" }
+  ],
+
+  "issues": [
+    {
+      "id": "issue-1",
+      "key": "DEMO-1",
+      "summary": "Implement user login form with email validation",
+      "type": "story",
+      "status": "in-progress",
+      "priority": "high",
+      "assignee": "user-2",
+      "reporter": "user-1",
+      "epic": "epic-1",
+      "storyPoints": 5,
+      "labels": ["frontend", "auth"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-2",
+      "key": "DEMO-2",
+      "summary": "Set up OAuth2 authentication with Google",
+      "type": "story",
+      "status": "todo",
+      "priority": "high",
+      "assignee": "user-3",
+      "reporter": "user-1",
+      "epic": "epic-1",
+      "storyPoints": 8,
+      "labels": ["backend", "oauth"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-3",
+      "key": "DEMO-3",
+      "summary": "Fix login button not responding on mobile",
+      "type": "bug",
+      "status": "in-progress",
+      "priority": "highest",
+      "assignee": "user-2",
+      "reporter": "user-4",
+      "epic": "epic-1",
+      "storyPoints": 2,
+      "labels": ["bug", "mobile"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-4",
+      "key": "DEMO-4",
+      "summary": "Design new dashboard wireframes",
+      "type": "task",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "user-4",
+      "reporter": "user-1",
+      "epic": "epic-2",
+      "storyPoints": 3,
+      "labels": ["design"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-5",
+      "key": "DEMO-5",
+      "summary": "Implement dashboard header component",
+      "type": "story",
+      "status": "in-review",
+      "priority": "medium",
+      "assignee": "user-3",
+      "reporter": "user-4",
+      "epic": "epic-2",
+      "storyPoints": 3,
+      "labels": ["frontend"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-6",
+      "key": "DEMO-6",
+      "summary": "Add activity feed widget to dashboard",
+      "type": "story",
+      "status": "todo",
+      "priority": "medium",
+      "assignee": null,
+      "reporter": "user-1",
+      "epic": "epic-2",
+      "storyPoints": 5,
+      "labels": ["frontend"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-7",
+      "key": "DEMO-7",
+      "summary": "Create REST API endpoints for user profile",
+      "type": "story",
+      "status": "todo",
+      "priority": "high",
+      "assignee": "user-3",
+      "reporter": "user-1",
+      "epic": "epic-3",
+      "storyPoints": 5,
+      "labels": ["backend", "api"],
+      "sprint": "sprint-2"
+    },
+    {
+      "id": "issue-8",
+      "key": "DEMO-8",
+      "summary": "Write unit tests for authentication module",
+      "type": "task",
+      "status": "todo",
+      "priority": "medium",
+      "assignee": "user-2",
+      "reporter": "user-1",
+      "epic": "epic-1",
+      "storyPoints": 3,
+      "labels": ["testing"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-9",
+      "key": "DEMO-9",
+      "summary": "Password strength indicator not showing",
+      "type": "bug",
+      "status": "todo",
+      "priority": "low",
+      "assignee": null,
+      "reporter": "user-4",
+      "epic": "epic-1",
+      "storyPoints": 1,
+      "labels": ["bug", "frontend"],
+      "sprint": "sprint-1"
+    },
+    {
+      "id": "issue-10",
+      "key": "DEMO-10",
+      "summary": "Update documentation for API v2",
+      "type": "task",
+      "status": "done",
+      "priority": "low",
+      "assignee": "user-1",
+      "reporter": "user-1",
+      "epic": "epic-3",
+      "storyPoints": 2,
+      "labels": ["documentation"],
+      "sprint": "sprint-1"
+    }
+  ]
+}
+
+================================================================================
+INITIAL SIMULATOR STATE
+Place in: config/simulator/initial-state.json
+================================================================================
+
+{
+  "currentProject": {
+    "id": "proj-1",
+    "key": "DEMO",
+    "name": "Demo Project",
+    "type": "software"
+  },
+  "currentView": "board",
+  "sidebarCollapsed": false,
+  "issueDetailOpen": false,
+  "createModalOpen": false,
+  "filters": {
+    "assignee": null,
+    "type": null,
+    "search": ""
+  }
+}

@@ -1,0 +1,570 @@
+================================================================================
+REACT COMPONENTS FOR VOICE-OVER GUIDED LEARNING
+Add these to your Next.js Jira simulator
+================================================================================
+
+These components enable the interactive voice-guided learning experience where:
+1. Voice plays automatically when step loads
+2. UI is dimmed except for target element
+3. User can only click after audio finishes
+4. Hints shown on wrong clicks
+
+
+================================================================================
+FILE: components/simulator/interaction/VoiceOverPlayer.tsx
+================================================================================
+
+import { useRef, useState, useEffect } from 'react';
+
+interface VoiceOverPlayerProps {
+  audioUrl: string | null;
+  narrationText: string;
+  onAudioComplete: () => void;
+  onSkip: () => void;
+  delayAfterAudio?: number;
+}
+
+export function VoiceOverPlayer({
+  audioUrl,
+  narrationText,
+  onAudioComplete,
+  onSkip,
+  delayAfterAudio = 300
+}: VoiceOverPlayerProps): JSX.Element {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    // Auto-play when audio URL changes
+    if (audioUrl && audioRef.current) {
+      setHasError(false);
+      audioRef.current.play().catch(() => {
+        setHasError(true);
+        // If audio fails, allow interaction after delay
+        setTimeout(onAudioComplete, 1000);
+      });
+    } else if (!audioUrl) {
+      // No audio URL, just show text and enable interaction
+      setTimeout(onAudioComplete, 2000);
+    }
+  }, [audioUrl]);
+
+  const handlePlay = (): void => {
+    setIsPlaying(true);
+  };
+
+  const handleEnded = (): void => {
+    setIsPlaying(false);
+    // Small delay before enabling interaction
+    setTimeout(onAudioComplete, delayAfterAudio);
+  };
+
+  const handleReplay = (): void => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    }
+  };
+
+  return (
+    <div className="voice-over-player">
+      {/* Hidden audio element */}
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onPlay={handlePlay}
+          onEnded={handleEnded}
+          onError={() => setHasError(true)}
+        />
+      )}
+
+      {/* Subtitle bar */}
+      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 
+                      bg-gray-900/90 text-white px-6 py-4 rounded-lg 
+                      max-w-2xl shadow-lg z-50">
+        <div className="flex items-start gap-4">
+          {/* Speaking indicator */}
+          <div className="flex-shrink-0">
+            {isPlaying ? (
+              <span className="text-2xl animate-pulse">🔊</span>
+            ) : (
+              <span className="text-2xl opacity-50">🔈</span>
+            )}
+          </div>
+
+          {/* Narration text */}
+          <p className="text-lg leading-relaxed flex-1">
+            {narrationText}
+          </p>
+
+          {/* Controls */}
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={handleReplay}
+              className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 
+                         rounded transition-colors"
+              title="Replay"
+            >
+              ↻
+            </button>
+            <button
+              onClick={onSkip}
+              className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 
+                         rounded transition-colors"
+              title="Skip"
+            >
+              Skip →
+            </button>
+          </div>
+        </div>
+
+        {hasError && (
+          <p className="text-yellow-400 text-sm mt-2">
+            Audio unavailable. Read the instructions above.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: components/simulator/interaction/Highlighter.tsx
+================================================================================
+
+import { useEffect, useState } from 'react';
+
+interface HighlighterProps {
+  selector: string;
+  style: 'pulse' | 'glow' | 'outline' | 'arrow';
+  color?: string;
+  enabled: boolean;
+  pulsing?: boolean;
+}
+
+export function Highlighter({
+  selector,
+  style,
+  color = '#0052CC',
+  enabled,
+  pulsing = false
+}: HighlighterProps): JSX.Element | null {
+  const [position, setPosition] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    const element = document.querySelector(selector);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      setPosition(rect);
+
+      // Update position on scroll/resize
+      const updatePosition = (): void => {
+        const newRect = element.getBoundingClientRect();
+        setPosition(newRect);
+      };
+
+      window.addEventListener('scroll', updatePosition);
+      window.addEventListener('resize', updatePosition);
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [selector]);
+
+  if (!position) return null;
+
+  const baseStyles: React.CSSProperties = {
+    position: 'fixed',
+    top: position.top - 4,
+    left: position.left - 4,
+    width: position.width + 8,
+    height: position.height + 8,
+    pointerEvents: 'none',
+    zIndex: 40,
+    borderRadius: '4px',
+    transition: 'all 0.3s ease'
+  };
+
+  const getStyleVariant = (): React.CSSProperties => {
+    switch (style) {
+      case 'pulse':
+        return {
+          ...baseStyles,
+          border: `3px solid ${color}`,
+          animation: pulsing ? 'pulse-border 1.5s ease-in-out infinite' : 'none',
+          boxShadow: `0 0 0 4px ${color}33`
+        };
+      case 'glow':
+        return {
+          ...baseStyles,
+          border: `2px solid ${color}`,
+          boxShadow: `0 0 20px ${color}66, 0 0 40px ${color}33`,
+          animation: pulsing ? 'glow-pulse 1.5s ease-in-out infinite' : 'none'
+        };
+      case 'outline':
+        return {
+          ...baseStyles,
+          border: `3px dashed ${color}`,
+          animation: pulsing ? 'dash-march 1s linear infinite' : 'none'
+        };
+      case 'arrow':
+        return baseStyles; // Arrow handled separately
+      default:
+        return baseStyles;
+    }
+  };
+
+  return (
+    <>
+      {/* Highlight box */}
+      <div 
+        className={`highlighter highlighter-${style}`} 
+        style={getStyleVariant()}
+      />
+
+      {/* Arrow pointer (if arrow style) */}
+      {style === 'arrow' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: position.top - 40,
+            left: position.left + position.width / 2 - 20,
+            fontSize: '40px',
+            zIndex: 41,
+            animation: pulsing ? 'bounce-down 1s ease-in-out infinite' : 'none'
+          }}
+        >
+          👇
+        </div>
+      )}
+
+      {/* CSS animations */}
+      <style jsx global>{`
+        @keyframes pulse-border {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.02); opacity: 0.8; }
+        }
+        
+        @keyframes glow-pulse {
+          0%, 100% { box-shadow: 0 0 20px ${color}66, 0 0 40px ${color}33; }
+          50% { box-shadow: 0 0 30px ${color}88, 0 0 60px ${color}44; }
+        }
+        
+        @keyframes dash-march {
+          to { stroke-dashoffset: -20; }
+        }
+        
+        @keyframes bounce-down {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(10px); }
+        }
+      `}</style>
+    </>
+  );
+}
+
+
+================================================================================
+FILE: components/simulator/interaction/GuidedModeOverlay.tsx
+================================================================================
+
+import { useState, useEffect, useCallback } from 'react';
+import { VoiceOverPlayer } from './VoiceOverPlayer';
+import { Highlighter } from './Highlighter';
+
+interface LessonStep {
+  id: string;
+  step_order: number;
+  narration_text: string;
+  audio_url: string | null;
+  audio_duration: number | null;
+  target_selector: string;
+  highlight_style: 'pulse' | 'glow' | 'outline' | 'arrow';
+  highlight_color: string;
+  expected_action: string;
+  delay_after_audio: number;
+  hint_on_wrong_click: string | null;
+  allow_skip: boolean;
+}
+
+interface GuidedModeOverlayProps {
+  steps: LessonStep[];
+  currentStepIndex: number;
+  onStepComplete: (stepId: string) => void;
+  onLessonComplete: () => void;
+}
+
+export function GuidedModeOverlay({
+  steps,
+  currentStepIndex,
+  onStepComplete,
+  onLessonComplete
+}: GuidedModeOverlayProps): JSX.Element {
+  const [canInteract, setCanInteract] = useState(false);
+  const [audioComplete, setAudioComplete] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [hintMessage, setHintMessage] = useState('');
+
+  const currentStep = steps[currentStepIndex];
+  const isLastStep = currentStepIndex === steps.length - 1;
+
+  // Reset state when step changes
+  useEffect(() => {
+    setCanInteract(false);
+    setAudioComplete(false);
+    setShowHint(false);
+    setHintMessage('');
+  }, [currentStepIndex]);
+
+  const handleAudioComplete = useCallback((): void => {
+    setAudioComplete(true);
+    setCanInteract(true);
+  }, []);
+
+  const handleSkip = useCallback((): void => {
+    setCanInteract(true);
+    setAudioComplete(true);
+  }, []);
+
+  const handleOverlayClick = useCallback((e: React.MouseEvent): void => {
+    if (!canInteract) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    const target = e.target as HTMLElement;
+    const targetElement = document.querySelector(currentStep.target_selector);
+
+    // Check if click is on or within target element
+    if (targetElement && (targetElement === target || targetElement.contains(target))) {
+      // Correct click!
+      if (isLastStep) {
+        onLessonComplete();
+      } else {
+        onStepComplete(currentStep.id);
+      }
+    } else {
+      // Wrong click - show hint
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const hint = currentStep.hint_on_wrong_click || 
+        'Try clicking on the highlighted element.';
+      setHintMessage(hint);
+      setShowHint(true);
+
+      // Hide hint after 3 seconds
+      setTimeout(() => setShowHint(false), 3000);
+    }
+  }, [canInteract, currentStep, isLastStep, onStepComplete, onLessonComplete]);
+
+  return (
+    <div 
+      className="guided-mode-overlay fixed inset-0 z-30"
+      onClick={handleOverlayClick}
+    >
+      {/* Dim layer - covers everything */}
+      <div 
+        className="absolute inset-0 bg-black/40 transition-opacity"
+        style={{ 
+          pointerEvents: canInteract ? 'none' : 'all',
+          cursor: canInteract ? 'default' : 'not-allowed'
+        }}
+      />
+
+      {/* Highlight target element */}
+      <Highlighter
+        selector={currentStep.target_selector}
+        style={currentStep.highlight_style}
+        color={currentStep.highlight_color}
+        enabled={canInteract}
+        pulsing={audioComplete}
+      />
+
+      {/* Voice-over player */}
+      <VoiceOverPlayer
+        audioUrl={currentStep.audio_url}
+        narrationText={currentStep.narration_text}
+        onAudioComplete={handleAudioComplete}
+        onSkip={handleSkip}
+        delayAfterAudio={currentStep.delay_after_audio}
+      />
+
+      {/* Progress indicator */}
+      <div className="fixed top-4 right-4 bg-white/90 px-4 py-2 rounded-lg shadow z-50">
+        <span className="text-sm font-medium">
+          Step {currentStepIndex + 1} of {steps.length}
+        </span>
+        <div className="w-32 h-2 bg-gray-200 rounded-full mt-1">
+          <div 
+            className="h-full bg-blue-600 rounded-full transition-all"
+            style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Hint tooltip */}
+      {showHint && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+                        bg-yellow-100 border border-yellow-400 text-yellow-800
+                        px-6 py-4 rounded-lg shadow-lg z-50 max-w-md text-center">
+          <p className="font-medium">💡 Hint</p>
+          <p className="mt-1">{hintMessage}</p>
+        </div>
+      )}
+
+      {/* Waiting indicator (while audio plays) */}
+      {!canInteract && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2
+                        bg-blue-100 text-blue-800 px-4 py-2 rounded-full
+                        text-sm font-medium z-50">
+          🎧 Listen to the instructions...
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: components/simulator/LessonPlayer.tsx
+================================================================================
+
+import { useState, useEffect } from 'react';
+import { JiraSimulator } from './JiraSimulator';
+import { GuidedModeOverlay } from './interaction/GuidedModeOverlay';
+
+interface LessonPlayerProps {
+  lessonId: string;
+}
+
+export function LessonPlayer({ lessonId }: LessonPlayerProps): JSX.Element {
+  const [lesson, setLesson] = useState<any>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch lesson with steps
+    async function fetchLesson(): Promise<void> {
+      const res = await fetch(`/api/lessons/${lessonId}`);
+      const data = await res.json();
+      setLesson(data);
+      setLoading(false);
+    }
+    fetchLesson();
+  }, [lessonId]);
+
+  const handleStepComplete = async (stepId: string): Promise<void> => {
+    // Save progress
+    await fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lessonId,
+        stepId,
+        completedAt: new Date().toISOString()
+      })
+    });
+
+    // Move to next step
+    setCurrentStepIndex(prev => prev + 1);
+  };
+
+  const handleLessonComplete = async (): Promise<void> => {
+    await fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lessonId,
+        completed: true,
+        completedAt: new Date().toISOString()
+      })
+    });
+
+    setIsComplete(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
+
+  if (isComplete) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="text-6xl mb-4">🎉</div>
+        <h1 className="text-2xl font-bold mb-2">Lesson Complete!</h1>
+        <p className="text-gray-600 mb-4">You've completed {lesson.title}</p>
+        <a 
+          href="/lessons" 
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Back to Lessons
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="lesson-player relative h-screen">
+      {/* The Jira Simulator */}
+      <JiraSimulator
+        initialState={lesson.simulator_state}
+        lessonMode={true}
+      />
+
+      {/* Guided overlay with voice-over */}
+      <GuidedModeOverlay
+        steps={lesson.lesson_steps}
+        currentStepIndex={currentStepIndex}
+        onStepComplete={handleStepComplete}
+        onLessonComplete={handleLessonComplete}
+      />
+    </div>
+  );
+}
+
+
+================================================================================
+USAGE NOTES
+================================================================================
+
+1. Install these components in your Next.js project
+2. Ensure Tailwind CSS is configured
+3. The LessonPlayer fetches lesson data from /api/lessons/[id]
+4. Audio files should be hosted on a CDN (Cloudflare R2)
+5. Progress is saved via /api/progress endpoint
+
+API Response format for /api/lessons/[id]:
+{
+  "id": "uuid",
+  "title": "Jira Navigation Basics",
+  "lesson_steps": [
+    {
+      "id": "step-uuid",
+      "step_order": 1,
+      "narration_text": "Welcome! Let's explore the navigation...",
+      "audio_url": "https://cdn.example.com/audio/lesson-01/step-01.mp3",
+      "audio_duration": 4500,
+      "target_selector": "[data-testid='atlassian-navigation']",
+      "highlight_style": "glow",
+      "highlight_color": "#0052CC",
+      "expected_action": "click",
+      "delay_after_audio": 300,
+      "hint_on_wrong_click": "Look at the top navigation bar."
+    }
+  ],
+  "simulator_state": { ... }
+}
+
+================================================================================

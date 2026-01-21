@@ -1,0 +1,289 @@
+================================================================================
+N8N WORKFLOW: VOICE-OVER GENERATOR
+Trigger: Webhook (on-demand) or after lesson evaluation
+================================================================================
+
+PURPOSE:
+- Generate AI voice narration for each lesson step
+- Pre-generate audio files (not real-time TTS)
+- Store audio URLs in database
+- Enable interactive voice-guided learning
+
+OUTPUT:
+- One MP3 file per step (3-8 seconds each)
+- Stored in Cloudflare R2
+- URLs saved to lesson_steps.audio_url
+
+================================================================================
+WORKFLOW FLOW
+================================================================================
+
+1. Webhook receives lesson_id (+ optional steps_to_regenerate)
+2. Load lesson and steps from Supabase
+3. Claude writes/improves narration scripts
+4. For each step:
+   a. Call ElevenLabs TTS API
+   b. Upload audio to Cloudflare R2
+   c. Update step with audio_url
+5. Mark lesson voice_over_status = 'ready'
+6. Notify Slack
+
+================================================================================
+NODE CONFIGURATIONS
+================================================================================
+
+NODE 1: Webhook Trigger
+-----------------------
+Type: n8n-nodes-base.webhook
+Config:
+{
+  "httpMethod": "POST",
+  "path": "generate-voice-over",
+  "responseMode": "lastNode"
+}
+
+Expected payload:
+{
+  "lesson_id": "uuid",
+  "steps_to_regenerate": [1, 3, 5],  // optional, if empty = all steps
+  "triggered_by": "manual" | "lesson-evaluator"
+}
+
+NODE 2: Load Lesson with Steps
+------------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "get",
+  "tableId": "lessons",
+  "filters": [{ "keyName": "id", "keyValue": "={{$json.lesson_id}}" }],
+  "additionalFields": {
+    "select": "*, lesson_steps(*)"
+  }
+}
+
+NODE 3: Update Lesson Status
+----------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "update",
+  "tableId": "lessons",
+  "filters": [{ "keyName": "id", "keyValue": "={{$json.id}}" }],
+  "fields": {
+    "voice_over_status": "generating"
+  }
+}
+
+NODE 4: Filter Steps to Process
+-------------------------------
+Type: n8n-nodes-base.code
+Code:
+```javascript
+const lesson = $input.first().json;
+const stepsToRegen = $('Webhook Trigger').first().json.steps_to_regenerate || [];
+
+let steps = lesson.lesson_steps || [];
+
+// If specific steps requested, filter to those
+if (stepsToRegen.length > 0) {
+  steps = steps.filter(s => stepsToRegen.includes(s.step_order));
+}
+
+// Sort by order
+steps.sort((a, b) => a.step_order - b.step_order);
+
+return steps.map(s => ({ 
+  json: { 
+    ...s, 
+    lesson_id: lesson.id,
+    lesson_title: lesson.title 
+  } 
+}));
+```
+
+NODE 5: Claude Script Improver (Optional)
+-----------------------------------------
+Type: @n8n/n8n-nodes-langchain.agent
+Config:
+{
+  "model": "claude-sonnet-4-5-20250929",
+  "systemMessage": "[SEE AGENT-PROMPTS.txt - SCRIPT WRITER]",
+  "prompt": "Review and improve this narration for a Jira tutorial step:\n\nLesson: {{$json.lesson_title}}\nStep {{$json.step_order}}: {{$json.narration_text}}\nTarget element: {{$json.target_selector}}\n\nMake it:\n- Conversational (150 words/min speaking pace)\n- Under 15 words per sentence\n- Clear about what to click\n- 3-8 seconds when spoken\n\nReturn ONLY the improved narration text, nothing else."
+}
+
+NODE 6: Loop Through Steps
+--------------------------
+Type: n8n-nodes-base.splitInBatches
+Config: { "batchSize": 1 }
+
+NODE 7: Generate Audio (ElevenLabs)
+-----------------------------------
+Type: n8n-nodes-base.httpRequest
+Config:
+{
+  "method": "POST",
+  "url": "https://api.elevenlabs.io/v1/text-to-speech/{{$env.ELEVENLABS_VOICE_ID}}",
+  "headers": {
+    "xi-api-key": "{{$env.ELEVENLABS_API_KEY}}",
+    "Content-Type": "application/json"
+  },
+  "body": {
+    "text": "={{$json.narration_text}}",
+    "model_id": "eleven_turbo_v2",
+    "voice_settings": {
+      "stability": 0.70,
+      "similarity_boost": 0.80,
+      "style": 0.50,
+      "use_speaker_boost": true
+    }
+  },
+  "responseFormat": "file"
+}
+
+NODE 8: Upload to Cloudflare R2
+-------------------------------
+Type: n8n-nodes-base.httpRequest
+Config:
+{
+  "method": "PUT",
+  "url": "https://{{$env.R2_BUCKET}}.r2.cloudflarestorage.com/audio/{{$json.lesson_id}}/step-{{$json.step_order}}.mp3",
+  "headers": {
+    "Authorization": "Bearer {{$env.R2_API_TOKEN}}",
+    "Content-Type": "audio/mpeg"
+  },
+  "body": "={{$binary.data}}"
+}
+
+NODE 9: Get Audio Duration
+--------------------------
+Type: n8n-nodes-base.code
+Code:
+```javascript
+// Estimate duration from file size (rough approximation)
+// Better: use ffprobe or audio analysis service
+const fileSizeBytes = $input.first().json.contentLength || 0;
+const bitrateKbps = 128;
+const durationMs = Math.round((fileSizeBytes * 8) / (bitrateKbps * 1000) * 1000);
+
+return [{
+  json: {
+    ...$input.first().json,
+    audio_duration: durationMs
+  }
+}];
+```
+
+NODE 10: Update Step with Audio URL
+-----------------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "update",
+  "tableId": "lesson_steps",
+  "filters": [
+    { "keyName": "lesson_id", "keyValue": "={{$json.lesson_id}}" },
+    { "keyName": "step_order", "keyValue": "={{$json.step_order}}" }
+  ],
+  "fields": {
+    "audio_url": "https://{{$env.R2_PUBLIC_URL}}/audio/{{$json.lesson_id}}/step-{{$json.step_order}}.mp3",
+    "audio_duration": "={{$json.audio_duration}}"
+  }
+}
+
+NODE 11: Continue Loop
+----------------------
+Type: n8n-nodes-base.noOp
+
+NODE 12: Mark Lesson Complete
+-----------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "update",
+  "tableId": "lessons",
+  "filters": [{ "keyName": "id", "keyValue": "={{$('Load Lesson').first().json.id}}" }],
+  "fields": {
+    "voice_over_status": "ready",
+    "voice_over_generated_at": "={{$now.toISO()}}"
+  }
+}
+
+NODE 13: Slack Notification
+---------------------------
+Type: n8n-nodes-base.slack
+Config:
+{
+  "channel": "#jira-course-updates",
+  "message": "Voice-over generated for lesson: {{$('Load Lesson').first().json.title}}. {{stepsProcessed}} audio files created."
+}
+
+NODE 14: Return Success
+-----------------------
+Type: n8n-nodes-base.respondToWebhook
+Config:
+{
+  "respondWith": "json",
+  "responseBody": {
+    "success": true,
+    "lesson_id": "={{$('Load Lesson').first().json.id}}",
+    "steps_processed": "={{$('Loop Steps').outputItems.length}}"
+  }
+}
+
+================================================================================
+CONNECTIONS
+================================================================================
+
+1-webhook -> 2-load-lesson -> 3-update-status -> 4-filter-steps
+4-filter-steps -> 5-claude-improve (optional) -> 6-loop
+6-loop -> 7-elevenlabs -> 8-upload-r2 -> 9-duration -> 10-update-step -> 11-continue -> 6-loop
+6-loop (done) -> 12-mark-complete -> 13-slack -> 14-return
+
+================================================================================
+ENVIRONMENT VARIABLES REQUIRED
+================================================================================
+
+ELEVENLABS_API_KEY
+ELEVENLABS_VOICE_ID     - e.g., "Rachel" or custom cloned voice
+R2_BUCKET               - Cloudflare R2 bucket name
+R2_API_TOKEN            - Cloudflare API token
+R2_PUBLIC_URL           - Public URL for R2 bucket
+SUPABASE_URL
+SUPABASE_KEY
+SLACK_WEBHOOK_URL
+
+================================================================================
+ELEVENLABS VOICE RECOMMENDATIONS
+================================================================================
+
+For tutorial/educational content:
+- Rachel (female, clear, professional)
+- Adam (male, clear, professional)
+- Or clone your own voice for brand consistency
+
+Voice settings for tutorials:
+- stability: 0.70 (consistent delivery)
+- similarity_boost: 0.80 (natural variation)
+- style: 0.50 (teaching tone)
+
+================================================================================
+AUDIO FILE ORGANIZATION
+================================================================================
+
+/audio
+  /lesson-01-uuid
+    step-01.mp3
+    step-02.mp3
+    step-03.mp3
+    ...
+  /lesson-02-uuid
+    step-01.mp3
+    ...
+
+Each file:
+- Format: MP3 (128kbps)
+- Duration: 3-8 seconds
+- Size: ~50-100KB per step
+
+================================================================================

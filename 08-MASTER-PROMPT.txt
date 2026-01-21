@@ -1,0 +1,1132 @@
+================================================================================
+JIRA CLOUD LEARNING PLATFORM - COMPLETE MASTER PROMPT
+Version 2.0 with Voice-Over Guided Learning
+================================================================================
+
+Use this prompt with an AI code editor (Cursor, Claude, etc.) to build the
+complete application from scratch.
+
+================================================================================
+PROJECT OVERVIEW
+================================================================================
+
+Build an interactive Jira Cloud learning platform where users learn Jira by
+clicking through a high-fidelity simulator (95%+ visual match to real Jira)
+while hearing AI-generated voice instructions.
+
+CORE EXPERIENCE:
+1. User selects a lesson
+2. Jira simulator loads with voice-over overlay
+3. Voice says "Click on Project Settings in the sidebar..."
+4. Target element highlights (rest of UI dimmed)
+5. User clicks highlighted element
+6. Voice plays next instruction
+7. Repeat until lesson complete
+8. Progress saved, next lesson unlocked
+
+KEY DIFFERENTIATOR: Not videos, not screenshots - a REAL interactive simulator
+with voice guidance.
+
+================================================================================
+TECH STACK
+================================================================================
+
+Frontend:
+- Next.js 14 (App Router)
+- TypeScript (strict mode)
+- Tailwind CSS
+- Zustand (state management)
+- Framer Motion (animations)
+
+Backend:
+- Next.js API Routes
+- Supabase (PostgreSQL + Auth + Storage)
+- Prisma ORM
+
+External Services:
+- Supabase Auth (Google, GitHub, email)
+- Cloudflare R2 (audio file storage)
+- n8n (workflow automation - separate)
+
+Deployment:
+- Vercel (frontend)
+- Supabase (database)
+- Railway (n8n workflows)
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+
+jira-learning-platform/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/page.tsx
+│   │   ├── signup/page.tsx
+│   │   └── layout.tsx
+│   ├── (dashboard)/
+│   │   ├── page.tsx                    # Dashboard home
+│   │   ├── lessons/
+│   │   │   ├── page.tsx                # Lesson catalog
+│   │   │   └── [lessonId]/page.tsx     # Lesson player
+│   │   ├── progress/page.tsx           # User progress
+│   │   ├── settings/page.tsx           # User settings
+│   │   └── layout.tsx                  # Dashboard layout
+│   ├── api/
+│   │   ├── lessons/
+│   │   │   ├── route.ts                # GET all lessons
+│   │   │   └── [lessonId]/route.ts     # GET single lesson
+│   │   ├── progress/
+│   │   │   ├── route.ts                # GET/POST progress
+│   │   │   └── [lessonId]/route.ts     # Lesson-specific progress
+│   │   ├── auth/
+│   │   │   └── callback/route.ts       # OAuth callback
+│   │   └── webhooks/
+│   │       └── voice-complete/route.ts # n8n webhook
+│   ├── layout.tsx                      # Root layout
+│   ├── page.tsx                        # Landing page
+│   └── globals.css
+├── components/
+│   ├── ui/                             # Shared UI components
+│   │   ├── Button.tsx
+│   │   ├── Card.tsx
+│   │   ├── Modal.tsx
+│   │   ├── Input.tsx
+│   │   ├── Select.tsx
+│   │   ├── Avatar.tsx
+│   │   ├── Badge.tsx
+│   │   ├── Tooltip.tsx
+│   │   ├── Progress.tsx
+│   │   └── index.ts
+│   ├── layout/
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── Footer.tsx
+│   ├── simulator/                      # JIRA SIMULATOR
+│   │   ├── core/
+│   │   │   ├── GlobalNav.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── ProjectSwitcher.tsx
+│   │   │   ├── SearchDialog.tsx
+│   │   │   ├── CreateButton.tsx
+│   │   │   ├── NotificationsMenu.tsx
+│   │   │   ├── HelpMenu.tsx
+│   │   │   ├── SettingsMenu.tsx
+│   │   │   └── UserMenu.tsx
+│   │   ├── views/
+│   │   │   ├── BoardView/
+│   │   │   │   ├── BoardView.tsx
+│   │   │   │   ├── BoardColumn.tsx
+│   │   │   │   ├── IssueCard.tsx
+│   │   │   │   ├── BoardHeader.tsx
+│   │   │   │   ├── BoardFilters.tsx
+│   │   │   │   └── QuickFilters.tsx
+│   │   │   ├── BacklogView/
+│   │   │   │   ├── BacklogView.tsx
+│   │   │   │   ├── SprintSection.tsx
+│   │   │   │   └── BacklogItem.tsx
+│   │   │   ├── IssueDetail/
+│   │   │   │   ├── IssueDetailPanel.tsx
+│   │   │   │   ├── IssueHeader.tsx
+│   │   │   │   ├── IssueDescription.tsx
+│   │   │   │   ├── IssueFields.tsx
+│   │   │   │   ├── IssueComments.tsx
+│   │   │   │   ├── IssueActivity.tsx
+│   │   │   │   └── IssueSidebar.tsx
+│   │   │   ├── ProjectSettings/
+│   │   │   │   ├── ProjectSettings.tsx
+│   │   │   │   ├── SettingsNav.tsx
+│   │   │   │   ├── DetailsSettings.tsx
+│   │   │   │   ├── AccessSettings.tsx
+│   │   │   │   └── WorkflowSettings.tsx
+│   │   │   └── TimelineView/
+│   │   │       ├── TimelineView.tsx
+│   │   │       └── TimelineBar.tsx
+│   │   ├── shared/
+│   │   │   ├── CreateIssueModal.tsx
+│   │   │   ├── IssueTypeIcon.tsx
+│   │   │   ├── PriorityIcon.tsx
+│   │   │   ├── StatusBadge.tsx
+│   │   │   ├── AssigneeAvatar.tsx
+│   │   │   └── EpicBadge.tsx
+│   │   ├── interaction/                # VOICE-OVER SYSTEM
+│   │   │   ├── GuidedModeOverlay.tsx
+│   │   │   ├── VoiceOverPlayer.tsx
+│   │   │   ├── Highlighter.tsx
+│   │   │   ├── StepProgress.tsx
+│   │   │   └── HintTooltip.tsx
+│   │   ├── JiraSimulator.tsx           # Main simulator wrapper
+│   │   └── SimulatorProvider.tsx       # Context provider
+│   ├── lessons/
+│   │   ├── LessonPlayer.tsx
+│   │   ├── LessonCard.tsx
+│   │   ├── LessonList.tsx
+│   │   ├── ModuleSection.tsx
+│   │   └── LessonComplete.tsx
+│   └── dashboard/
+│       ├── ProgressChart.tsx
+│       ├── RecentActivity.tsx
+│       ├── NextLesson.tsx
+│       └── StatsCards.tsx
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts                   # Browser client
+│   │   ├── server.ts                   # Server client
+│   │   └── middleware.ts               # Auth middleware
+│   ├── prisma/
+│   │   └── client.ts
+│   ├── utils/
+│   │   ├── cn.ts                       # classnames helper
+│   │   ├── formatters.ts
+│   │   └── validators.ts
+│   └── constants.ts
+├── stores/
+│   ├── simulatorStore.ts               # Jira simulator state
+│   ├── lessonStore.ts                  # Current lesson state
+│   ├── userStore.ts                    # User preferences
+│   └── audioStore.ts                   # Audio playback state
+├── hooks/
+│   ├── useSimulator.ts
+│   ├── useLesson.ts
+│   ├── useProgress.ts
+│   ├── useAudio.ts
+│   └── useKeyboardShortcuts.ts
+├── types/
+│   ├── database.ts                     # Supabase types
+│   ├── simulator.ts                    # Simulator types
+│   ├── lesson.ts                       # Lesson types
+│   └── index.ts
+├── styles/
+│   ├── globals.css
+│   ├── atlassian-tokens.css            # Jira design tokens
+│   └── simulator.css                   # Simulator-specific styles
+├── prisma/
+│   └── schema.prisma
+├── public/
+│   ├── images/
+│   │   ├── avatars/
+│   │   ├── icons/
+│   │   └── logos/
+│   └── fonts/
+├── config/
+│   ├── lessons/                        # Lesson definitions
+│   │   ├── module-a/
+│   │   │   ├── lesson-01.json
+│   │   │   ├── lesson-02.json
+│   │   │   └── ...
+│   │   ├── module-b/
+│   │   └── module-c/
+│   └── simulator/
+│       ├── mock-data.json              # Sample Jira data
+│       └── initial-state.json
+├── .env.local
+├── .env.example
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+└── package.json
+
+================================================================================
+CORE FEATURES TO IMPLEMENT
+================================================================================
+
+1. AUTHENTICATION
+   - Supabase Auth with Google, GitHub, Email
+   - Protected routes via middleware
+   - User profile management
+   - Session persistence
+
+2. JIRA SIMULATOR (95%+ visual fidelity)
+   - Global navigation bar
+   - Left sidebar with navigation
+   - Board view (Kanban)
+   - Backlog view
+   - Issue detail panel (slide-out)
+   - Create issue modal
+   - Project settings
+   - All interactive (clickable, hoverable)
+   - Matches current Jira Cloud 2025 design
+
+3. VOICE-OVER GUIDED LEARNING
+   - Pre-generated audio per step
+   - Auto-play on step load
+   - Subtitles always visible
+   - Skip/replay controls
+   - Interaction blocked until audio complete
+   - Highlight target element
+   - Dim rest of UI
+   - Validate correct clicks
+   - Show hints on wrong clicks
+
+4. LESSON SYSTEM
+   - 30 lessons across 5 modules
+   - Prerequisites/dependencies
+   - Progress tracking
+   - Completion certificates
+   - Lesson ratings/feedback
+
+5. PROGRESS TRACKING
+   - Per-lesson completion
+   - Per-step tracking
+   - Time spent
+   - Accuracy metrics
+   - Streak tracking
+   - Achievements/badges
+
+6. DASHBOARD
+   - Progress overview
+   - Recent activity
+   - Next recommended lesson
+   - Stats and charts
+   - Achievements display
+
+================================================================================
+DESIGN SPECIFICATIONS
+================================================================================
+
+ATLASSIAN DESIGN TOKENS (styles/atlassian-tokens.css):
+
+:root {
+  /* Primary Colors */
+  --atlassian-blue-50: #E9F2FF;
+  --atlassian-blue-100: #CCE0FF;
+  --atlassian-blue-200: #85B8FF;
+  --atlassian-blue-300: #579DFF;
+  --atlassian-blue-400: #388BFF;
+  --atlassian-blue-500: #1D7AFC;
+  --atlassian-blue-600: #0C66E4;
+  --atlassian-blue-700: #0055CC;
+  --atlassian-blue-800: #09326C;
+  --atlassian-blue-900: #092957;
+
+  /* Neutral Colors */
+  --atlassian-neutral-0: #FFFFFF;
+  --atlassian-neutral-100: #F7F8F9;
+  --atlassian-neutral-200: #F1F2F4;
+  --atlassian-neutral-300: #DCDFE4;
+  --atlassian-neutral-400: #B3B9C4;
+  --atlassian-neutral-500: #8590A2;
+  --atlassian-neutral-600: #626F86;
+  --atlassian-neutral-700: #44546F;
+  --atlassian-neutral-800: #2C3E5D;
+  --atlassian-neutral-900: #172B4D;
+
+  /* Status Colors */
+  --atlassian-green-500: #22A06B;
+  --atlassian-yellow-500: #CF9F02;
+  --atlassian-red-500: #E34935;
+  --atlassian-purple-500: #8270DB;
+  --atlassian-teal-500: #1D9AAA;
+
+  /* Semantic */
+  --color-background: var(--atlassian-neutral-100);
+  --color-background-card: var(--atlassian-neutral-0);
+  --color-text-primary: var(--atlassian-neutral-900);
+  --color-text-secondary: var(--atlassian-neutral-600);
+  --color-border: var(--atlassian-neutral-300);
+  --color-link: var(--atlassian-blue-600);
+  
+  /* Global Nav */
+  --global-nav-bg: #0055CC;
+  --global-nav-height: 56px;
+  
+  /* Sidebar */
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 20px;
+  --sidebar-bg: var(--atlassian-neutral-0);
+  
+  /* Board */
+  --board-column-width: 280px;
+  --board-column-bg: var(--atlassian-neutral-200);
+  --issue-card-bg: var(--atlassian-neutral-0);
+  
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  
+  /* Borders */
+  --border-radius-sm: 3px;
+  --border-radius-md: 4px;
+  --border-radius-lg: 8px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.25);
+  --shadow-md: 0 4px 8px rgba(9, 30, 66, 0.25);
+  --shadow-lg: 0 8px 16px rgba(9, 30, 66, 0.25);
+}
+
+RESPONSIVE BREAKPOINTS:
+- Mobile: < 768px (not primary focus, but functional)
+- Tablet: 768px - 1024px
+- Desktop: > 1024px (primary target)
+
+ACCESSIBILITY:
+- WCAG 2.1 AA compliance
+- Keyboard navigation
+- Screen reader support
+- Focus indicators
+- Color contrast ratios
+
+================================================================================
+SIMULATOR STATE MANAGEMENT (stores/simulatorStore.ts)
+================================================================================
+
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+
+interface Project {
+  id: string;
+  key: string;
+  name: string;
+  type: 'software' | 'business';
+  lead: User;
+  avatar: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+}
+
+interface Issue {
+  id: string;
+  key: string;
+  summary: string;
+  description: string;
+  type: 'story' | 'task' | 'bug' | 'epic' | 'subtask';
+  status: 'todo' | 'in-progress' | 'in-review' | 'done';
+  priority: 'highest' | 'high' | 'medium' | 'low' | 'lowest';
+  assignee: User | null;
+  reporter: User;
+  epic: { id: string; name: string; color: string } | null;
+  storyPoints: number | null;
+  labels: string[];
+  sprint: Sprint | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Sprint {
+  id: string;
+  name: string;
+  goal: string;
+  startDate: string;
+  endDate: string;
+  status: 'future' | 'active' | 'closed';
+}
+
+interface Column {
+  id: string;
+  name: string;
+  status: string;
+  issues: Issue[];
+}
+
+interface SimulatorState {
+  // Current context
+  currentProject: Project | null;
+  currentView: 'board' | 'backlog' | 'timeline' | 'settings';
+  currentIssue: Issue | null;
+  
+  // UI state
+  sidebarCollapsed: boolean;
+  issueDetailOpen: boolean;
+  createModalOpen: boolean;
+  searchDialogOpen: boolean;
+  
+  // Data
+  projects: Project[];
+  issues: Issue[];
+  columns: Column[];
+  sprints: Sprint[];
+  users: User[];
+  
+  // Filters
+  filters: {
+    assignee: string | null;
+    type: string | null;
+    search: string;
+  };
+  
+  // Actions
+  setCurrentProject: (project: Project) => void;
+  setCurrentView: (view: SimulatorState['currentView']) => void;
+  setCurrentIssue: (issue: Issue | null) => void;
+  toggleSidebar: () => void;
+  openIssueDetail: (issue: Issue) => void;
+  closeIssueDetail: () => void;
+  openCreateModal: () => void;
+  closeCreateModal: () => void;
+  moveIssue: (issueId: string, toColumn: string) => void;
+  updateIssue: (issueId: string, updates: Partial<Issue>) => void;
+  createIssue: (issue: Omit<Issue, 'id' | 'key' | 'createdAt' | 'updatedAt'>) => void;
+  setFilter: (key: keyof SimulatorState['filters'], value: any) => void;
+  resetState: () => void;
+}
+
+const initialState = {
+  currentProject: null,
+  currentView: 'board' as const,
+  currentIssue: null,
+  sidebarCollapsed: false,
+  issueDetailOpen: false,
+  createModalOpen: false,
+  searchDialogOpen: false,
+  projects: [],
+  issues: [],
+  columns: [],
+  sprints: [],
+  users: [],
+  filters: {
+    assignee: null,
+    type: null,
+    search: '',
+  },
+};
+
+export const useSimulatorStore = create<SimulatorState>()(
+  devtools(
+    persist(
+      (set, get) => ({
+        ...initialState,
+        
+        setCurrentProject: (project) => set({ currentProject: project }),
+        
+        setCurrentView: (view) => set({ currentView: view }),
+        
+        setCurrentIssue: (issue) => set({ currentIssue: issue }),
+        
+        toggleSidebar: () => set((state) => ({ 
+          sidebarCollapsed: !state.sidebarCollapsed 
+        })),
+        
+        openIssueDetail: (issue) => set({ 
+          currentIssue: issue, 
+          issueDetailOpen: true 
+        }),
+        
+        closeIssueDetail: () => set({ 
+          currentIssue: null, 
+          issueDetailOpen: false 
+        }),
+        
+        openCreateModal: () => set({ createModalOpen: true }),
+        
+        closeCreateModal: () => set({ createModalOpen: false }),
+        
+        moveIssue: (issueId, toColumn) => set((state) => {
+          const issue = state.issues.find(i => i.id === issueId);
+          if (!issue) return state;
+          
+          const statusMap: Record<string, Issue['status']> = {
+            'todo': 'todo',
+            'in-progress': 'in-progress',
+            'in-review': 'in-review',
+            'done': 'done',
+          };
+          
+          return {
+            issues: state.issues.map(i => 
+              i.id === issueId 
+                ? { ...i, status: statusMap[toColumn] || i.status }
+                : i
+            ),
+          };
+        }),
+        
+        updateIssue: (issueId, updates) => set((state) => ({
+          issues: state.issues.map(i => 
+            i.id === issueId ? { ...i, ...updates, updatedAt: new Date().toISOString() } : i
+          ),
+          currentIssue: state.currentIssue?.id === issueId 
+            ? { ...state.currentIssue, ...updates }
+            : state.currentIssue,
+        })),
+        
+        createIssue: (issue) => set((state) => {
+          const newIssue: Issue = {
+            ...issue,
+            id: `issue-${Date.now()}`,
+            key: `${state.currentProject?.key || 'PROJ'}-${state.issues.length + 1}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          return { issues: [...state.issues, newIssue] };
+        }),
+        
+        setFilter: (key, value) => set((state) => ({
+          filters: { ...state.filters, [key]: value },
+        })),
+        
+        resetState: () => set(initialState),
+      }),
+      {
+        name: 'simulator-storage',
+        partialize: (state) => ({ 
+          sidebarCollapsed: state.sidebarCollapsed,
+          filters: state.filters,
+        }),
+      }
+    )
+  )
+);
+
+================================================================================
+LESSON STATE MANAGEMENT (stores/lessonStore.ts)
+================================================================================
+
+import { create } from 'zustand';
+
+interface LessonStep {
+  id: string;
+  stepOrder: number;
+  narrationText: string;
+  audioUrl: string | null;
+  audioDuration: number | null;
+  targetSelector: string;
+  highlightStyle: 'pulse' | 'glow' | 'outline' | 'arrow';
+  highlightColor: string;
+  expectedAction: 'click' | 'type' | 'drag' | 'hover';
+  actionValue?: string;
+  delayAfterAudio: number;
+  allowSkip: boolean;
+  hintOnWrongClick: string | null;
+  validationType: string;
+  validationConfig: Record<string, any>;
+}
+
+interface Lesson {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  moduleId: string;
+  objectives: string[];
+  estimatedDuration: number;
+  skillLevel: 'beginner' | 'intermediate' | 'advanced';
+  steps: LessonStep[];
+  prerequisites: string[];
+  simulatorState: Record<string, any>;
+}
+
+interface LessonState {
+  // Current lesson
+  currentLesson: Lesson | null;
+  currentStepIndex: number;
+  
+  // Playback state
+  isPlaying: boolean;
+  isPaused: boolean;
+  canInteract: boolean;
+  audioComplete: boolean;
+  
+  // Progress
+  completedSteps: string[];
+  wrongClicks: number;
+  startTime: number | null;
+  
+  // UI
+  showHint: boolean;
+  hintMessage: string;
+  
+  // Actions
+  loadLesson: (lesson: Lesson) => void;
+  startLesson: () => void;
+  pauseLesson: () => void;
+  resumeLesson: () => void;
+  nextStep: () => void;
+  previousStep: () => void;
+  completeStep: (stepId: string) => void;
+  setCanInteract: (canInteract: boolean) => void;
+  setAudioComplete: (complete: boolean) => void;
+  showHintMessage: (message: string) => void;
+  hideHint: () => void;
+  recordWrongClick: () => void;
+  resetLesson: () => void;
+}
+
+export const useLessonStore = create<LessonState>((set, get) => ({
+  currentLesson: null,
+  currentStepIndex: 0,
+  isPlaying: false,
+  isPaused: false,
+  canInteract: false,
+  audioComplete: false,
+  completedSteps: [],
+  wrongClicks: 0,
+  startTime: null,
+  showHint: false,
+  hintMessage: '',
+  
+  loadLesson: (lesson) => set({
+    currentLesson: lesson,
+    currentStepIndex: 0,
+    isPlaying: false,
+    isPaused: false,
+    canInteract: false,
+    audioComplete: false,
+    completedSteps: [],
+    wrongClicks: 0,
+    startTime: null,
+    showHint: false,
+    hintMessage: '',
+  }),
+  
+  startLesson: () => set({
+    isPlaying: true,
+    isPaused: false,
+    startTime: Date.now(),
+  }),
+  
+  pauseLesson: () => set({ isPaused: true }),
+  
+  resumeLesson: () => set({ isPaused: false }),
+  
+  nextStep: () => set((state) => {
+    const nextIndex = state.currentStepIndex + 1;
+    const totalSteps = state.currentLesson?.steps.length || 0;
+    
+    if (nextIndex >= totalSteps) {
+      return { isPlaying: false }; // Lesson complete
+    }
+    
+    return {
+      currentStepIndex: nextIndex,
+      canInteract: false,
+      audioComplete: false,
+      showHint: false,
+    };
+  }),
+  
+  previousStep: () => set((state) => ({
+    currentStepIndex: Math.max(0, state.currentStepIndex - 1),
+    canInteract: false,
+    audioComplete: false,
+    showHint: false,
+  })),
+  
+  completeStep: (stepId) => set((state) => ({
+    completedSteps: [...state.completedSteps, stepId],
+  })),
+  
+  setCanInteract: (canInteract) => set({ canInteract }),
+  
+  setAudioComplete: (complete) => set({ 
+    audioComplete: complete,
+    canInteract: complete,
+  }),
+  
+  showHintMessage: (message) => set({
+    showHint: true,
+    hintMessage: message,
+  }),
+  
+  hideHint: () => set({ showHint: false, hintMessage: '' }),
+  
+  recordWrongClick: () => set((state) => ({
+    wrongClicks: state.wrongClicks + 1,
+  })),
+  
+  resetLesson: () => set({
+    currentStepIndex: 0,
+    isPlaying: false,
+    isPaused: false,
+    canInteract: false,
+    audioComplete: false,
+    completedSteps: [],
+    wrongClicks: 0,
+    startTime: null,
+    showHint: false,
+    hintMessage: '',
+  }),
+}));
+
+================================================================================
+API ROUTES
+================================================================================
+
+// app/api/lessons/route.ts
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function GET() {
+  const supabase = createClient();
+  
+  const { data: lessons, error } = await supabase
+    .from('lessons')
+    .select(`
+      id,
+      slug,
+      title,
+      description,
+      module_id,
+      objectives,
+      skill_level,
+      estimated_duration,
+      sort_order,
+      evaluation_score,
+      voice_over_status
+    `)
+    .eq('is_published', true)
+    .order('sort_order');
+  
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  
+  return NextResponse.json(lessons);
+}
+
+
+// app/api/lessons/[lessonId]/route.ts
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function GET(
+  request: Request,
+  { params }: { params: { lessonId: string } }
+) {
+  const supabase = createClient();
+  
+  const { data: lesson, error } = await supabase
+    .from('lessons')
+    .select(`
+      *,
+      lesson_steps (
+        id,
+        step_order,
+        narration_text,
+        audio_url,
+        audio_duration,
+        target_selector,
+        highlight_style,
+        highlight_color,
+        expected_action,
+        action_value,
+        delay_after_audio,
+        allow_skip,
+        hint_on_wrong_click,
+        validation_type,
+        validation_config,
+        required_simulator_state,
+        state_changes_after
+      )
+    `)
+    .eq('id', params.lessonId)
+    .single();
+  
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  
+  // Sort steps by order
+  if (lesson.lesson_steps) {
+    lesson.lesson_steps.sort((a, b) => a.step_order - b.step_order);
+  }
+  
+  return NextResponse.json(lesson);
+}
+
+
+// app/api/progress/route.ts
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function GET(request: Request) {
+  const supabase = createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  const { data: progress, error } = await supabase
+    .from('user_progress')
+    .select('*')
+    .eq('user_id', user.id);
+  
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  
+  return NextResponse.json(progress);
+}
+
+export async function POST(request: Request) {
+  const supabase = createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  const body = await request.json();
+  const { lessonId, stepId, completed, timeSpent, wrongClicks } = body;
+  
+  const { data, error } = await supabase
+    .from('user_progress')
+    .upsert({
+      user_id: user.id,
+      lesson_id: lessonId,
+      last_step_id: stepId,
+      completed: completed || false,
+      time_spent_seconds: timeSpent || 0,
+      wrong_clicks: wrongClicks || 0,
+      updated_at: new Date().toISOString(),
+    }, {
+      onConflict: 'user_id,lesson_id',
+    });
+  
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  
+  return NextResponse.json({ success: true });
+}
+
+================================================================================
+ENVIRONMENT VARIABLES (.env.example)
+================================================================================
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Audio CDN
+NEXT_PUBLIC_AUDIO_CDN_URL=https://your-bucket.r2.cloudflarestorage.com
+
+# Analytics (optional)
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=
+
+================================================================================
+PACKAGE.JSON DEPENDENCIES
+================================================================================
+
+{
+  "name": "jira-learning-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "next": "14.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/ssr": "^0.1.0",
+    "zustand": "^4.5.0",
+    "framer-motion": "^11.0.0",
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "lucide-react": "^0.300.0",
+    "date-fns": "^3.0.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/react": "^18.2.0",
+    "@types/node": "^20.10.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.2.0",
+    "prisma": "^5.8.0",
+    "@prisma/client": "^5.8.0"
+  }
+}
+
+================================================================================
+TAILWIND CONFIG (tailwind.config.ts)
+================================================================================
+
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Atlassian Design System colors
+        atlassian: {
+          blue: {
+            50: '#E9F2FF',
+            100: '#CCE0FF',
+            200: '#85B8FF',
+            300: '#579DFF',
+            400: '#388BFF',
+            500: '#1D7AFC',
+            600: '#0C66E4',
+            700: '#0055CC',
+            800: '#09326C',
+            900: '#092957',
+          },
+          neutral: {
+            0: '#FFFFFF',
+            100: '#F7F8F9',
+            200: '#F1F2F4',
+            300: '#DCDFE4',
+            400: '#B3B9C4',
+            500: '#8590A2',
+            600: '#626F86',
+            700: '#44546F',
+            800: '#2C3E5D',
+            900: '#172B4D',
+          },
+          green: {
+            500: '#22A06B',
+          },
+          yellow: {
+            500: '#CF9F02',
+          },
+          red: {
+            500: '#E34935',
+          },
+          purple: {
+            500: '#8270DB',
+          },
+          teal: {
+            500: '#1D9AAA',
+          },
+        },
+      },
+      fontFamily: {
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'sans-serif'],
+      },
+      spacing: {
+        'sidebar': '240px',
+        'sidebar-collapsed': '20px',
+        'nav-height': '56px',
+      },
+      boxShadow: {
+        'atlassian-sm': '0 1px 2px rgba(9, 30, 66, 0.25)',
+        'atlassian-md': '0 4px 8px rgba(9, 30, 66, 0.25)',
+        'atlassian-lg': '0 8px 16px rgba(9, 30, 66, 0.25)',
+      },
+      animation: {
+        'pulse-border': 'pulse-border 1.5s ease-in-out infinite',
+        'glow': 'glow 1.5s ease-in-out infinite',
+      },
+      keyframes: {
+        'pulse-border': {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.02)', opacity: '0.8' },
+        },
+        'glow': {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(0, 85, 204, 0.4)' },
+          '50%': { boxShadow: '0 0 40px rgba(0, 85, 204, 0.6)' },
+        },
+      },
+    },
+  },
+  plugins: [],
+};
+
+export default config;
+
+================================================================================
+IMPLEMENTATION PRIORITY
+================================================================================
+
+PHASE 1: Core Infrastructure (Week 1)
+- [ ] Project setup (Next.js, TypeScript, Tailwind)
+- [ ] Supabase setup (database, auth)
+- [ ] Basic routing and layouts
+- [ ] Authentication flow
+
+PHASE 2: Jira Simulator (Week 2-3)
+- [ ] GlobalNav component
+- [ ] Sidebar component
+- [ ] BoardView with columns
+- [ ] IssueCard component
+- [ ] IssueDetailPanel
+- [ ] CreateIssueModal
+- [ ] Simulator state management
+- [ ] Mock data setup
+
+PHASE 3: Voice-Over System (Week 4)
+- [ ] VoiceOverPlayer component
+- [ ] Highlighter component
+- [ ] GuidedModeOverlay
+- [ ] LessonPlayer wrapper
+- [ ] Audio playback integration
+- [ ] Click validation
+
+PHASE 4: Lesson System (Week 5)
+- [ ] Lesson catalog page
+- [ ] Lesson player page
+- [ ] Progress tracking
+- [ ] Lesson completion flow
+- [ ] Module organization
+
+PHASE 5: Dashboard & Polish (Week 6)
+- [ ] Dashboard home
+- [ ] Progress charts
+- [ ] Achievements
+- [ ] Settings page
+- [ ] Error handling
+- [ ] Loading states
+- [ ] Responsive tweaks
+
+================================================================================
+CRITICAL SUCCESS FACTORS
+================================================================================
+
+1. SIMULATOR FIDELITY
+   - Must look 95%+ like real Jira Cloud 2025
+   - Take screenshots of real Jira for reference
+   - Match colors, spacing, typography exactly
+   - All elements must be interactive
+
+2. VOICE-OVER TIMING
+   - Audio must feel natural, not rushed
+   - 300ms delay after audio before enabling clicks
+   - Smooth transitions between steps
+   - Skip button always available
+
+3. LESSON FLOW
+   - Clear indication of what to click
+   - Helpful hints on wrong clicks
+   - Progress always visible
+   - Easy to pause/resume
+
+4. PERFORMANCE
+   - Simulator must be snappy
+   - Audio preloading for next steps
+   - No lag on interactions
+   - Fast page transitions
+
+================================================================================
+END OF MASTER PROMPT
+================================================================================

@@ -1,0 +1,134 @@
+================================================================================
+JIRA COURSE PLATFORM - AI WORKFLOW ARCHITECTURE
+Version 2.0 with Voice-Over Guided Learning
+================================================================================
+
+QUICK ANSWERS
+=============
+
+Q: Should workflows be separate from web app?
+A: YES. Keep n8n workflows separate. Share Supabase database.
+
+Q: Which workflow tool?
+A: n8n (self-hosted on Railway, ~$20/month)
+
+Q: Which video/voice tool?
+A: ElevenLabs for voice + Playwright for screen recording (skip Veo 3)
+
+Q: Total monthly cost?
+A: ~$106/month for all AI services
+
+
+SYSTEM OVERVIEW
+===============
+
+Your platform has TWO parts that work together:
+
+1. WEB APPLICATION (Next.js)
+   - User authentication
+   - Lesson playback with voice-over
+   - Jira simulator (95%+ fidelity)
+   - Click-through guided learning
+   - Progress tracking
+
+2. AI WORKFLOWS (n8n - separate)
+   - Weekly lesson evaluation
+   - Daily design sync
+   - Voice-over generation
+   - Runs on schedule, not per-request
+
+
+THREE CORE WORKFLOWS
+====================
+
+WORKFLOW 1: Lesson Evaluator
+- Schedule: Weekly (Sunday 2AM)
+- Does: Scrapes Jira docs -> Compares to lessons -> Scores each
+- Output: Updated scores + flags lessons needing audio regeneration
+- Cost: ~$20/week in API calls
+
+WORKFLOW 2: Design Sync  
+- Schedule: Daily (6AM)
+- Does: Screenshots Jira -> Compares to simulator -> Creates PRs
+- Output: GitHub PRs with CSS fixes
+- Cost: ~$5/day in API calls
+
+WORKFLOW 3: Voice-Over Generator
+- Schedule: On-demand (webhook)
+- Does: Writes script -> Generates audio per step -> Uploads to CDN
+- Output: Audio URLs in database for each lesson step
+- Cost: ~$0.50 per lesson
+
+
+VOICE-OVER GUIDED LEARNING SYSTEM
+=================================
+
+How it works for users:
+
+1. User starts lesson
+2. Step 1 loads -> Voice plays automatically
+   "Let's open Project Settings in the sidebar..."
+3. UI is dimmed, target element highlighted (but not clickable yet)
+4. Audio finishes -> 300ms delay -> Highlight starts pulsing
+5. User clicks highlighted element
+6. Validation passes -> Step 2 loads -> Voice plays...
+7. Repeat until lesson complete
+
+Key features:
+- Pre-generated audio (not real-time TTS)
+- One audio file per step (3-8 seconds each)
+- Subtitles always shown
+- Skip/replay buttons
+- Hints on wrong clicks
+
+
+DATA FLOW
+=========
+
+Supabase Database (shared by app and workflows):
+
+lessons
+  -> lesson_steps (with audio_url, narration_text)
+  -> lesson_evaluations (scores from workflow)
+
+jira_docs_embeddings (for RAG evaluation)
+
+design_diffs (UI comparison results)
+
+
+MONTHLY COSTS
+=============
+
+n8n (Railway).............$20
+Firecrawl (scraping)......$19
+Claude API................$15
+GPT-4V API................$10
+OpenAI Embeddings.........$5
+Browserbase...............$10
+ElevenLabs................$22
+Cloudflare R2.............$5
+--------------------------
+TOTAL: ~$106/month
+
+
+IMPLEMENTATION ORDER
+====================
+
+Week 1-2: Set up n8n + Lesson Evaluator
+Week 3-4: Add Design Sync workflow
+Week 5-6: Build Voice-Over Generator
+Week 7-8: Integration + testing
+
+
+FILES IN THIS PACKAGE
+=====================
+
+01-ARCHITECTURE-OVERVIEW.txt    <- You are here
+02-SUPABASE-SCHEMA.txt          <- Database tables with voice-over support
+03-WORKFLOW-LESSON-EVALUATOR.txt <- n8n workflow JSON
+04-WORKFLOW-DESIGN-SYNC.txt     <- n8n workflow JSON
+05-WORKFLOW-VOICE-GENERATOR.txt <- n8n workflow JSON
+06-AGENT-PROMPTS.txt            <- AI prompts for all agents
+07-REACT-COMPONENTS.txt         <- Voice-over player components
+
+================================================================================

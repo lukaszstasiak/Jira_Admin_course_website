@@ -1,0 +1,255 @@
+================================================================================
+N8N WORKFLOW: LESSON CONTENT EVALUATOR
+Schedule: Weekly (Sunday 2AM UTC)
+================================================================================
+
+PURPOSE:
+- Scrape latest Jira Cloud documentation
+- Compare each lesson against current docs
+- Score lessons (0-100)
+- Flag lessons needing content updates
+- Trigger voice-over regeneration when narration text needs changing
+
+WORKFLOW FLOW:
+1. Cron trigger (Sunday 2AM)
+2. Scrape Jira docs with Firecrawl
+3. Chunk and embed documents
+4. Store in Supabase pgvector
+5. For each lesson:
+   a. Load lesson + steps
+   b. RAG query related docs
+   c. Claude evaluates accuracy
+   d. Store evaluation results
+   e. If audio_regen_needed, trigger voice workflow
+6. Send weekly summary to Slack
+
+================================================================================
+NODE CONFIGURATIONS
+================================================================================
+
+NODE 1: Schedule Trigger
+------------------------
+Type: n8n-nodes-base.scheduleTrigger
+Config:
+{
+  "rule": {
+    "interval": [{
+      "field": "cronExpression",
+      "expression": "0 2 * * 0"
+    }]
+  }
+}
+
+NODE 2: Scrape Jira Documentation
+---------------------------------
+Type: n8n-nodes-base.httpRequest
+Config:
+{
+  "method": "POST",
+  "url": "https://api.firecrawl.dev/v1/crawl",
+  "headers": {
+    "Authorization": "Bearer {{$env.FIRECRAWL_API_KEY}}"
+  },
+  "body": {
+    "url": "https://support.atlassian.com/jira-cloud/",
+    "crawlerOptions": {
+      "limit": 500,
+      "maxDepth": 3,
+      "includes": ["/jira-cloud/", "/jira-software-cloud/"],
+      "excludes": ["/community/", "/developer/"]
+    },
+    "pageOptions": {
+      "onlyMainContent": true
+    }
+  }
+}
+
+NODE 3: Chunk Content
+---------------------
+Type: n8n-nodes-base.code
+Code:
+```javascript
+const pages = $input.first().json.data || [];
+const chunks = [];
+const CHUNK_SIZE = 4000;
+const OVERLAP = 200;
+
+for (const page of pages) {
+  const content = page.markdown || page.content || '';
+  for (let i = 0; i < content.length; i += CHUNK_SIZE - OVERLAP) {
+    chunks.push({
+      content: content.slice(i, i + CHUNK_SIZE),
+      source_url: page.url,
+      page_title: page.title,
+      chunk_index: Math.floor(i / CHUNK_SIZE),
+      scraped_at: new Date().toISOString()
+    });
+  }
+}
+
+return chunks.map(c => ({ json: c }));
+```
+
+NODE 4: Create Embeddings
+-------------------------
+Type: @n8n/n8n-nodes-langchain.embeddingsOpenAi
+Config:
+{
+  "model": "text-embedding-3-small"
+}
+Credentials: OpenAI API
+
+NODE 5: Store in Supabase
+-------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "upsert",
+  "tableId": "jira_docs_embeddings",
+  "conflictFields": ["content_hash"]
+}
+
+NODE 6: Load Lessons with Steps
+-------------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "getAll",
+  "tableId": "lessons",
+  "returnAll": true,
+  "additionalFields": {
+    "select": "*, lesson_steps(*)"
+  }
+}
+
+NODE 7: Loop Through Lessons
+----------------------------
+Type: n8n-nodes-base.splitInBatches
+Config:
+{
+  "batchSize": 1
+}
+
+NODE 8: Claude Evaluator Agent
+------------------------------
+Type: @n8n/n8n-nodes-langchain.agent
+Config:
+{
+  "agent": "conversationalAgent",
+  "model": "claude-sonnet-4-5-20250929",
+  "temperature": 0.3,
+  "systemMessage": "[SEE AGENT-PROMPTS.txt - LESSON EVALUATOR]",
+  "tools": ["vectorStoreTool"]
+}
+
+NODE 9: Parse Evaluation
+------------------------
+Type: n8n-nodes-base.code
+Code:
+```javascript
+const output = $input.first().json.output;
+const lesson = $('Load Lessons').item.json;
+
+let evaluation;
+try {
+  const match = output.match(/\{[\s\S]*\}/);
+  evaluation = JSON.parse(match[0]);
+} catch (e) {
+  evaluation = {
+    lessonId: lesson.id,
+    overallScore: 50,
+    audioRegenNeeded: false,
+    stepsNeedingNewAudio: [],
+    recommendations: { action: 'update', priority: 'high' }
+  };
+}
+
+evaluation.lesson_id = lesson.id;
+evaluation.evaluated_at = new Date().toISOString();
+return [{ json: evaluation }];
+```
+
+NODE 10: Store Evaluation
+-------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "insert",
+  "tableId": "lesson_evaluations"
+}
+
+NODE 11: Update Lesson Score
+----------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "update",
+  "tableId": "lessons",
+  "filters": [{ "keyName": "id", "keyValue": "={{$json.lesson_id}}" }],
+  "fields": {
+    "evaluation_score": "={{$json.overallScore}}",
+    "needs_review": "={{$json.overallScore < 70}}",
+    "last_evaluated_at": "={{$json.evaluated_at}}",
+    "voice_over_status": "={{$json.audioRegenNeeded ? 'pending' : undefined}}"
+  }
+}
+
+NODE 12: Check If Audio Regen Needed
+------------------------------------
+Type: n8n-nodes-base.if
+Config:
+{
+  "conditions": [{
+    "leftValue": "={{$json.audioRegenNeeded}}",
+    "rightValue": true,
+    "operator": "equals"
+  }]
+}
+
+NODE 13: Trigger Voice-Over Workflow
+------------------------------------
+Type: n8n-nodes-base.httpRequest
+Config:
+{
+  "method": "POST",
+  "url": "{{$env.N8N_WEBHOOK_URL}}/webhook/generate-voice-over",
+  "body": {
+    "lesson_id": "={{$json.lesson_id}}",
+    "steps_to_regenerate": "={{$json.stepsNeedingNewAudio}}",
+    "triggered_by": "lesson-evaluator"
+  }
+}
+
+NODE 14: Slack Weekly Summary
+-----------------------------
+Type: n8n-nodes-base.slack
+Config:
+{
+  "channel": "#jira-course-updates",
+  "message": "Weekly evaluation complete. {{totalEvaluated}} lessons checked. Average score: {{avgScore}}. Audio regen needed: {{audioRegenCount}} lessons."
+}
+
+================================================================================
+CONNECTIONS
+================================================================================
+
+1-trigger -> 2-scrape, 6-load-lessons
+2-scrape -> 3-chunk -> 4-embed -> 5-store
+6-load -> 7-loop -> 8-evaluator -> 9-parse -> 10-store -> 11-update -> 12-check
+12-check (yes) -> 13-trigger-voice -> 7-loop (continue)
+12-check (no) -> 7-loop (continue)
+7-loop (done) -> 14-slack
+
+================================================================================
+ENVIRONMENT VARIABLES REQUIRED
+================================================================================
+
+FIRECRAWL_API_KEY
+ANTHROPIC_API_KEY
+OPENAI_API_KEY
+SUPABASE_URL
+SUPABASE_KEY
+SLACK_WEBHOOK_URL
+N8N_WEBHOOK_URL
+
+================================================================================

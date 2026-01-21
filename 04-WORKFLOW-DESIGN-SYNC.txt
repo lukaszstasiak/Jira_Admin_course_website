@@ -1,0 +1,255 @@
+================================================================================
+N8N WORKFLOW: SIMULATOR DESIGN SYNC
+Schedule: Daily (6AM UTC)
+================================================================================
+
+PURPOSE:
+- Capture screenshots of real Jira Cloud UI
+- Compare to simulator component screenshots
+- Detect visual differences (colors, spacing, icons)
+- Generate CSS fixes automatically
+- Create GitHub PRs for updates
+- Flag affected lessons for review
+
+TARGET: Maintain >95% visual fidelity between simulator and Jira Cloud
+
+================================================================================
+COMPONENTS TO COMPARE (10 total)
+================================================================================
+
+1. global-nav      - Global Navigation bar
+2. sidebar         - Left sidebar navigation
+3. project-switcher - Project dropdown
+4. board-view      - Kanban board
+5. issue-card      - Individual issue cards
+6. issue-detail    - Issue detail panel
+7. create-modal    - Create issue modal
+8. project-settings - Project settings page
+9. filters-panel   - Board filters
+10. user-menu      - User profile menu
+
+================================================================================
+WORKFLOW FLOW
+================================================================================
+
+1. Daily cron trigger (6AM UTC)
+2. For each component:
+   a. Browserbase captures Jira screenshot
+   b. Load simulator baseline screenshot
+   c. GPT-4V compares both images
+   d. If similarity < 95%:
+      - Claude generates CSS fixes
+      - Create GitHub PR
+      - Flag affected lessons
+3. Send daily summary to Slack
+
+================================================================================
+NODE CONFIGURATIONS
+================================================================================
+
+NODE 1: Daily Trigger
+---------------------
+Type: n8n-nodes-base.scheduleTrigger
+Config:
+{
+  "rule": {
+    "interval": [{
+      "field": "cronExpression",
+      "expression": "0 6 * * *"
+    }]
+  }
+}
+
+NODE 2: Define Screenshot Targets
+---------------------------------
+Type: n8n-nodes-base.code
+Code:
+```javascript
+const targets = [
+  {
+    id: 'global-nav',
+    name: 'Global Navigation',
+    file: 'components/simulator/core/GlobalNav.tsx',
+    jiraUrl: process.env.JIRA_INSTANCE_URL + '/jira/software/projects/DEMO/boards/1',
+    selector: '[data-testid="atlassian-navigation"]',
+    viewport: { width: 1920, height: 80 },
+    waitMs: 2000
+  },
+  {
+    id: 'sidebar',
+    name: 'Sidebar',
+    file: 'components/simulator/core/Sidebar.tsx',
+    jiraUrl: process.env.JIRA_INSTANCE_URL + '/jira/software/projects/DEMO/boards/1',
+    selector: '[data-testid="sidebar"]',
+    viewport: { width: 280, height: 800 },
+    waitMs: 2000
+  },
+  {
+    id: 'board-view',
+    name: 'Board View',
+    file: 'components/simulator/views/BoardView/BoardView.tsx',
+    jiraUrl: process.env.JIRA_INSTANCE_URL + '/jira/software/projects/DEMO/boards/1',
+    selector: '[data-testid="software-board"]',
+    viewport: { width: 1200, height: 800 },
+    waitMs: 3000
+  },
+  {
+    id: 'issue-card',
+    name: 'Issue Card',
+    file: 'components/simulator/views/BoardView/IssueCard.tsx',
+    jiraUrl: process.env.JIRA_INSTANCE_URL + '/jira/software/projects/DEMO/boards/1',
+    selector: '[data-testid="board-card"]:first-of-type',
+    viewport: { width: 320, height: 150 },
+    waitMs: 2000
+  },
+  {
+    id: 'issue-detail',
+    name: 'Issue Detail Panel',
+    file: 'components/simulator/views/IssueDetail/IssueDetailPanel.tsx',
+    jiraUrl: process.env.JIRA_INSTANCE_URL + '/browse/DEMO-1',
+    selector: '[data-testid="issue-layout"]',
+    viewport: { width: 800, height: 1000 },
+    waitMs: 3000
+  }
+  // ... add remaining 5 components
+];
+
+return targets.map(t => ({ json: t }));
+```
+
+NODE 3: Loop Components
+-----------------------
+Type: n8n-nodes-base.splitInBatches
+Config: { "batchSize": 1 }
+
+NODE 4: Capture Jira Screenshot
+-------------------------------
+Type: n8n-nodes-base.httpRequest
+Config:
+{
+  "method": "POST",
+  "url": "https://api.browserbase.com/v1/sessions",
+  "headers": {
+    "Authorization": "Bearer {{$env.BROWSERBASE_API_KEY}}"
+  },
+  "body": {
+    "projectId": "{{$env.BROWSERBASE_PROJECT_ID}}",
+    "browserSettings": {
+      "viewport": "={{$json.viewport}}"
+    },
+    "actions": [
+      { "type": "navigate", "url": "={{$json.jiraUrl}}" },
+      { "type": "wait", "milliseconds": "={{$json.waitMs}}" },
+      { "type": "screenshot", "selector": "={{$json.selector}}" }
+    ]
+  }
+}
+
+NODE 5: Load Simulator Baseline
+-------------------------------
+Type: n8n-nodes-base.httpRequest
+Config:
+{
+  "method": "GET",
+  "url": "{{$env.BASELINE_SCREENSHOTS_URL}}/{{$json.id}}.png"
+}
+
+NODE 6: GPT-4V Visual Comparison
+--------------------------------
+Type: @n8n/n8n-nodes-langchain.openAi
+Config:
+{
+  "model": "gpt-4o",
+  "systemMessage": "[SEE AGENT-PROMPTS.txt - VISUAL COMPARISON]",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "image_url", "image_url": "={{$node['Capture Jira'].json.screenshot}}" },
+        { "type": "image_url", "image_url": "={{$node['Load Baseline'].json.data}}" },
+        { "type": "text", "text": "Compare these two screenshots of {{$json.name}}. Return JSON with differences." }
+      ]
+    }
+  ]
+}
+
+NODE 7: Check Similarity Score
+------------------------------
+Type: n8n-nodes-base.if
+Config:
+{
+  "conditions": [{
+    "leftValue": "={{$json.similarityScore}}",
+    "rightValue": 95,
+    "operator": "lt"
+  }]
+}
+
+NODE 8: Generate CSS Fixes (Claude)
+-----------------------------------
+Type: @n8n/n8n-nodes-langchain.agent
+Config:
+{
+  "model": "claude-sonnet-4-5-20250929",
+  "systemMessage": "[SEE AGENT-PROMPTS.txt - CSS GENERATOR]",
+  "prompt": "Generate CSS fixes for these differences: {{$json.differences}}"
+}
+
+NODE 9: Store Design Diff
+-------------------------
+Type: n8n-nodes-base.supabase
+Config:
+{
+  "operation": "insert",
+  "tableId": "design_diffs",
+  "fields": {
+    "component_id": "={{$json.componentId}}",
+    "component_name": "={{$json.componentName}}",
+    "component_file": "={{$json.componentFile}}",
+    "similarity_score": "={{$json.similarityScore}}",
+    "differences": "={{$json.differences}}",
+    "css_token_updates": "={{$json.cssTokenUpdates}}",
+    "priority": "={{$json.priority}}"
+  }
+}
+
+NODE 10: Create GitHub PR
+-------------------------
+Type: n8n-nodes-base.github
+Config:
+{
+  "operation": "create",
+  "resource": "pullRequest",
+  "owner": "{{$env.GITHUB_OWNER}}",
+  "repo": "{{$env.GITHUB_REPO}}",
+  "title": "Design sync: Update {{$json.componentName}}",
+  "body": "Automated design sync detected differences.\n\nSimilarity: {{$json.similarityScore}}%\n\nChanges:\n{{$json.cssTokenUpdates}}",
+  "head": "design-sync/{{$json.componentId}}-{{$now.format('yyyy-MM-dd')}}",
+  "base": "main"
+}
+
+NODE 11: Slack Notification
+---------------------------
+Type: n8n-nodes-base.slack
+Config:
+{
+  "channel": "#jira-course-updates",
+  "message": "Design diff detected for {{$json.componentName}}. Similarity: {{$json.similarityScore}}%. PR created: {{$json.prUrl}}"
+}
+
+================================================================================
+ENVIRONMENT VARIABLES REQUIRED
+================================================================================
+
+JIRA_INSTANCE_URL      - Your Jira Cloud instance
+BROWSERBASE_API_KEY    - Browserbase for screenshots
+BROWSERBASE_PROJECT_ID
+BASELINE_SCREENSHOTS_URL - Where simulator screenshots are stored
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+GITHUB_TOKEN
+GITHUB_OWNER
+GITHUB_REPO
+SLACK_WEBHOOK_URL
+
+================================================================================

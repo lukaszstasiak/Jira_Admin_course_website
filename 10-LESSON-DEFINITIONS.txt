@@ -1,0 +1,524 @@
+================================================================================
+LESSON DEFINITIONS - 30 LESSONS ACROSS 5 MODULES
+================================================================================
+
+These JSON configurations define each lesson's content, steps, and voice-over.
+Place in: config/lessons/module-X/lesson-XX.json
+
+================================================================================
+MODULE A: JIRA FUNDAMENTALS (Lessons 1-6)
+================================================================================
+
+LESSON 01: Navigating the Jira Interface
+-----------------------------------------
+{
+  "id": "lesson-01",
+  "slug": "navigating-jira-interface",
+  "moduleId": "module-a",
+  "title": "Navigating the Jira Interface",
+  "description": "Learn the core components of Jira's interface including the global navigation, sidebar, and main content areas.",
+  "objectives": [
+    "Identify the main areas of the Jira interface",
+    "Use the global navigation bar",
+    "Navigate using the sidebar",
+    "Access project settings"
+  ],
+  "skillLevel": "beginner",
+  "estimatedDuration": 5,
+  "prerequisites": [],
+  "sortOrder": 1,
+  "simulatorState": {
+    "currentView": "board",
+    "sidebarCollapsed": false,
+    "currentProject": "DEMO"
+  },
+  "steps": [
+    {
+      "stepOrder": 1,
+      "narrationText": "Welcome to Jira! Let's start by exploring the interface. At the top, you'll see the global navigation bar in blue.",
+      "targetSelector": "[data-testid='atlassian-navigation']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "delayAfterAudio": 500,
+      "hintOnWrongClick": "Look at the blue bar at the very top of the screen."
+    },
+    {
+      "stepOrder": 2,
+      "narrationText": "On the left side, you'll find the sidebar. This is where you navigate within your project. Click anywhere on it.",
+      "targetSelector": "[data-testid='sidebar']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "delayAfterAudio": 300,
+      "hintOnWrongClick": "The sidebar is the white panel on the left side of the screen."
+    },
+    {
+      "stepOrder": 3,
+      "narrationText": "The sidebar shows different views for your project. Click on Board to see your Kanban board.",
+      "targetSelector": "[data-testid='nav-board']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "delayAfterAudio": 300,
+      "hintOnWrongClick": "Look for 'Board' with a columns icon in the sidebar."
+    },
+    {
+      "stepOrder": 4,
+      "narrationText": "The main area shows your board with columns for different statuses. This is where you'll manage your work.",
+      "targetSelector": "[data-testid='software-board']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "delayAfterAudio": 500,
+      "hintOnWrongClick": "Click anywhere on the board with the columns."
+    },
+    {
+      "stepOrder": 5,
+      "narrationText": "Finally, let's look at project settings. Click on Project settings at the bottom of the sidebar.",
+      "targetSelector": "[data-testid='sidebar-project-settings']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "delayAfterAudio": 300,
+      "hintOnWrongClick": "Scroll down in the sidebar and look for 'Project settings' with a gear icon."
+    },
+    {
+      "stepOrder": 6,
+      "narrationText": "Great job! You've learned the main areas of Jira. The navigation bar, sidebar, and main content area work together to help you manage projects.",
+      "targetSelector": "[data-testid='atlassian-navigation']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "delayAfterAudio": 500,
+      "hintOnWrongClick": "Click the navigation bar to complete this lesson."
+    }
+  ]
+}
+
+
+LESSON 02: Understanding Projects
+---------------------------------
+{
+  "id": "lesson-02",
+  "slug": "understanding-projects",
+  "moduleId": "module-a",
+  "title": "Understanding Projects",
+  "description": "Learn about Jira project types, how to switch between projects, and project organization.",
+  "objectives": [
+    "Understand different project types",
+    "Switch between projects",
+    "View project details"
+  ],
+  "skillLevel": "beginner",
+  "estimatedDuration": 4,
+  "prerequisites": ["lesson-01"],
+  "sortOrder": 2,
+  "steps": [
+    {
+      "stepOrder": 1,
+      "narrationText": "Every Jira workspace contains projects. Click on the project name in the sidebar to see the project switcher.",
+      "targetSelector": "[data-testid='project-switcher']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look at the top of the sidebar where the current project name is shown."
+    },
+    {
+      "stepOrder": 2,
+      "narrationText": "The project switcher shows all projects you have access to. You can search or click to switch projects.",
+      "targetSelector": "[data-testid='project-switcher-dropdown']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "hintOnWrongClick": "The dropdown should be open. Click on any project in the list."
+    },
+    {
+      "stepOrder": 3,
+      "narrationText": "Projects can be software projects for development teams, or business projects for other teams. Notice the project type indicator.",
+      "targetSelector": "[data-testid='sidebar']",
+      "highlightStyle": "outline",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click anywhere on the sidebar."
+    },
+    {
+      "stepOrder": 4,
+      "narrationText": "To see project details and configuration, click on Project settings.",
+      "targetSelector": "[data-testid='sidebar-project-settings']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look for Project settings at the bottom of the sidebar."
+    }
+  ]
+}
+
+
+LESSON 03: Creating Your First Issue
+------------------------------------
+{
+  "id": "lesson-03",
+  "slug": "creating-first-issue",
+  "moduleId": "module-a",
+  "title": "Creating Your First Issue",
+  "description": "Learn how to create issues in Jira including stories, tasks, and bugs.",
+  "objectives": [
+    "Open the create issue modal",
+    "Fill in required fields",
+    "Create different issue types"
+  ],
+  "skillLevel": "beginner",
+  "estimatedDuration": 6,
+  "prerequisites": ["lesson-01"],
+  "sortOrder": 3,
+  "steps": [
+    {
+      "stepOrder": 1,
+      "narrationText": "To create a new issue, click the Create button in the navigation bar.",
+      "targetSelector": "[data-testid='global-create-button']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look for the blue Create button in the top navigation bar."
+    },
+    {
+      "stepOrder": 2,
+      "narrationText": "The create issue modal opens. First, make sure the correct project is selected.",
+      "targetSelector": "[data-testid='create-issue-modal']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "hintOnWrongClick": "The modal should be open. Click anywhere on it."
+    },
+    {
+      "stepOrder": 3,
+      "narrationText": "Choose an issue type. Stories are for user-facing features, Tasks for work items, and Bugs for defects.",
+      "targetSelector": "[data-testid='issue-type-select']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look for the Issue type dropdown in the form."
+    },
+    {
+      "stepOrder": 4,
+      "narrationText": "Enter a clear summary that describes what needs to be done. This is the issue title.",
+      "targetSelector": "[data-testid='summary-input']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on the Summary text field."
+    },
+    {
+      "stepOrder": 5,
+      "narrationText": "Add a description with more details. You can use formatting, attach files, and mention team members.",
+      "targetSelector": "[data-testid='description-field']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on the Description field below Summary."
+    },
+    {
+      "stepOrder": 6,
+      "narrationText": "When ready, click Create to save your issue. It will appear on the board immediately.",
+      "targetSelector": "[data-testid='create-submit-button']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click the blue Create button at the bottom of the modal."
+    }
+  ]
+}
+
+
+LESSON 04: Working with the Board
+---------------------------------
+{
+  "id": "lesson-04",
+  "slug": "working-with-board",
+  "moduleId": "module-a",
+  "title": "Working with the Board",
+  "description": "Learn to use the Kanban board to visualize and manage your work.",
+  "objectives": [
+    "Understand board columns",
+    "Move issues between columns",
+    "Use quick filters"
+  ],
+  "skillLevel": "beginner",
+  "estimatedDuration": 5,
+  "prerequisites": ["lesson-03"],
+  "sortOrder": 4,
+  "steps": [
+    {
+      "stepOrder": 1,
+      "narrationText": "The board shows your work organized in columns. Each column represents a status like To Do, In Progress, or Done.",
+      "targetSelector": "[data-testid='software-board']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click anywhere on the board."
+    },
+    {
+      "stepOrder": 2,
+      "narrationText": "Issues are shown as cards. Click on any card to see its details.",
+      "targetSelector": "[data-testid='board-card']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on any issue card on the board."
+    },
+    {
+      "stepOrder": 3,
+      "narrationText": "To move an issue, you can drag it to another column. This changes its status automatically.",
+      "targetSelector": "[data-testid='board-column-in-progress']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on the In Progress column."
+    },
+    {
+      "stepOrder": 4,
+      "narrationText": "Use quick filters to focus on specific issues. Click the filter button to see options.",
+      "targetSelector": "[data-testid='board-filter-button']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look for the filter icon above the board."
+    }
+  ]
+}
+
+
+LESSON 05: Issue Details
+------------------------
+{
+  "id": "lesson-05",
+  "slug": "issue-details",
+  "moduleId": "module-a",
+  "title": "Issue Details",
+  "description": "Learn to view and edit issue details, add comments, and track activity.",
+  "objectives": [
+    "Open the issue detail panel",
+    "Edit issue fields",
+    "Add comments"
+  ],
+  "skillLevel": "beginner",
+  "estimatedDuration": 5,
+  "prerequisites": ["lesson-04"],
+  "sortOrder": 5,
+  "steps": [
+    {
+      "stepOrder": 1,
+      "narrationText": "Click on any issue card to open its detail panel.",
+      "targetSelector": "[data-testid='board-card']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on any issue card on the board."
+    },
+    {
+      "stepOrder": 2,
+      "narrationText": "The detail panel shows all information about the issue. You can edit the title by clicking on it.",
+      "targetSelector": "[data-testid='issue-summary']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on the issue title at the top of the panel."
+    },
+    {
+      "stepOrder": 3,
+      "narrationText": "The description area lets you add detailed information. Click to edit.",
+      "targetSelector": "[data-testid='issue-description']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on the description section."
+    },
+    {
+      "stepOrder": 4,
+      "narrationText": "On the right side, you can change the status. Click the status dropdown.",
+      "targetSelector": "[data-testid='issue-status-dropdown']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look for the status badge on the right side of the panel."
+    },
+    {
+      "stepOrder": 5,
+      "narrationText": "You can assign the issue to a team member. Click the assignee field.",
+      "targetSelector": "[data-testid='issue-assignee-field']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look for Assignee on the right sidebar."
+    }
+  ]
+}
+
+
+LESSON 06: Using Search
+-----------------------
+{
+  "id": "lesson-06",
+  "slug": "using-search",
+  "moduleId": "module-a",
+  "title": "Using Search",
+  "description": "Learn to find issues quickly using Jira's search functionality.",
+  "objectives": [
+    "Use quick search",
+    "Search across projects",
+    "Filter search results"
+  ],
+  "skillLevel": "beginner",
+  "estimatedDuration": 4,
+  "prerequisites": ["lesson-01"],
+  "sortOrder": 6,
+  "steps": [
+    {
+      "stepOrder": 1,
+      "narrationText": "To search for issues, click the search icon in the navigation bar or press the forward slash key.",
+      "targetSelector": "[data-testid='search-button']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Look for the magnifying glass icon in the top navigation."
+    },
+    {
+      "stepOrder": 2,
+      "narrationText": "The search dialog opens. Start typing to find issues, projects, or boards.",
+      "targetSelector": "[data-testid='search-dialog']",
+      "highlightStyle": "glow",
+      "expectedAction": "click",
+      "hintOnWrongClick": "The search dialog should be open. Click inside it."
+    },
+    {
+      "stepOrder": 3,
+      "narrationText": "Search results appear as you type. Click on any result to navigate to it.",
+      "targetSelector": "[data-testid='search-results']",
+      "highlightStyle": "pulse",
+      "expectedAction": "click",
+      "hintOnWrongClick": "Click on any search result."
+    }
+  ]
+}
+
+
+================================================================================
+MODULE B: BOARD MASTERY (Lessons 7-12)
+================================================================================
+
+LESSON 07: Board Columns and Statuses
+{
+  "id": "lesson-07",
+  "slug": "board-columns-statuses",
+  "moduleId": "module-b",
+  "title": "Board Columns and Statuses",
+  "description": "Understand how board columns map to workflow statuses.",
+  "skillLevel": "intermediate",
+  "estimatedDuration": 5,
+  "prerequisites": ["lesson-04"],
+  "sortOrder": 7
+}
+
+LESSON 08: Drag and Drop Workflow
+{
+  "id": "lesson-08",
+  "slug": "drag-drop-workflow",
+  "moduleId": "module-b",
+  "title": "Drag and Drop Workflow",
+  "description": "Master moving issues through your workflow.",
+  "skillLevel": "intermediate",
+  "estimatedDuration": 4,
+  "prerequisites": ["lesson-07"],
+  "sortOrder": 8
+}
+
+LESSON 09: Board Filters
+{
+  "id": "lesson-09",
+  "slug": "board-filters",
+  "moduleId": "module-b",
+  "title": "Board Filters",
+  "description": "Learn to filter the board by assignee, label, and more.",
+  "skillLevel": "intermediate",
+  "estimatedDuration": 5,
+  "prerequisites": ["lesson-04"],
+  "sortOrder": 9
+}
+
+LESSON 10: Quick Filters
+{
+  "id": "lesson-10",
+  "slug": "quick-filters",
+  "moduleId": "module-b",
+  "title": "Quick Filters",
+  "description": "Use and customize quick filters for faster navigation.",
+  "skillLevel": "intermediate",
+  "estimatedDuration": 4,
+  "prerequisites": ["lesson-09"],
+  "sortOrder": 10
+}
+
+LESSON 11: Board Settings
+{
+  "id": "lesson-11",
+  "slug": "board-settings",
+  "moduleId": "module-b",
+  "title": "Board Settings",
+  "description": "Configure your board columns and settings.",
+  "skillLevel": "intermediate",
+  "estimatedDuration": 6,
+  "prerequisites": ["lesson-07"],
+  "sortOrder": 11
+}
+
+LESSON 12: Swimlanes
+{
+  "id": "lesson-12",
+  "slug": "swimlanes",
+  "moduleId": "module-b",
+  "title": "Swimlanes",
+  "description": "Organize your board with swimlanes for better visibility.",
+  "skillLevel": "intermediate",
+  "estimatedDuration": 5,
+  "prerequisites": ["lesson-11"],
+  "sortOrder": 12
+}
+
+
+================================================================================
+MODULE C: BACKLOG MANAGEMENT (Lessons 13-18)
+================================================================================
+
+LESSON 13: Understanding the Backlog
+LESSON 14: Prioritizing Issues
+LESSON 15: Creating Sprints
+LESSON 16: Sprint Planning
+LESSON 17: Starting a Sprint
+LESSON 18: Completing a Sprint
+
+
+================================================================================
+MODULE D: ISSUE MANAGEMENT (Lessons 19-24)
+================================================================================
+
+LESSON 19: Issue Types Deep Dive
+LESSON 20: Custom Fields
+LESSON 21: Issue Links
+LESSON 22: Subtasks
+LESSON 23: Epics
+LESSON 24: Labels and Components
+
+
+================================================================================
+MODULE E: PROJECT ADMINISTRATION (Lessons 25-30)
+================================================================================
+
+LESSON 25: Project Settings Overview
+LESSON 26: Managing Team Access
+LESSON 27: Workflow Configuration
+LESSON 28: Notifications Setup
+LESSON 29: Automation Rules
+LESSON 30: Project Reporting
+
+
+================================================================================
+LESSON STEP TEMPLATE
+================================================================================
+
+Use this template for creating detailed steps:
+
+{
+  "stepOrder": 1,
+  "narrationText": "Clear instruction under 15 words. What to do and why.",
+  "audioUrl": null,
+  "audioDuration": null,
+  "targetSelector": "[data-testid='element-id']",
+  "highlightStyle": "pulse",
+  "highlightColor": "#0052CC",
+  "expectedAction": "click",
+  "actionValue": null,
+  "delayAfterAudio": 300,
+  "allowSkip": true,
+  "hintOnWrongClick": "Helpful hint if user clicks wrong element.",
+  "validationType": "element_clicked",
+  "validationConfig": {},
+  "requiredSimulatorState": null,
+  "stateChangesAfter": null
+}
+
+================================================================================

@@ -1,0 +1,255 @@
+================================================================================
+SUPABASE DATABASE SCHEMA
+With Voice-Over Support for Guided Learning
+================================================================================
+
+-- Run this in Supabase SQL Editor
+
+-- Enable extensions
+CREATE EXTENSION IF NOT EXISTS vector;
+
+================================================================================
+-- TABLE: lessons
+-- Main lesson metadata
+================================================================================
+CREATE TABLE lessons (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug TEXT UNIQUE NOT NULL,
+  module_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  objectives JSONB DEFAULT '[]',
+  skill_level TEXT DEFAULT 'beginner',
+  estimated_duration INTEGER,
+  
+  -- Evaluation (updated by workflow)
+  evaluation_score INTEGER DEFAULT 100,
+  needs_review BOOLEAN DEFAULT FALSE,
+  last_evaluated_at TIMESTAMPTZ,
+  
+  -- Voice-over status
+  voice_over_status TEXT DEFAULT 'pending',
+  voice_over_generated_at TIMESTAMPTZ,
+  
+  -- Ordering
+  sort_order INTEGER DEFAULT 0,
+  is_published BOOLEAN DEFAULT FALSE,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+================================================================================
+-- TABLE: lesson_steps
+-- Individual steps with voice-over audio (KEY TABLE)
+================================================================================
+CREATE TABLE lesson_steps (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  lesson_id UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  step_order INTEGER NOT NULL,
+  
+  -- VOICE-OVER CONTENT
+  narration_text TEXT NOT NULL,
+  audio_url TEXT,
+  audio_duration INTEGER,
+  
+  -- VISUAL GUIDANCE
+  target_selector TEXT NOT NULL,
+  highlight_style TEXT DEFAULT 'pulse',
+  highlight_color TEXT DEFAULT '#0052CC',
+  
+  -- INTERACTION
+  expected_action TEXT DEFAULT 'click',
+  action_value TEXT,
+  delay_after_audio INTEGER DEFAULT 300,
+  allow_skip BOOLEAN DEFAULT TRUE,
+  
+  -- VALIDATION
+  validation_type TEXT DEFAULT 'element_clicked',
+  validation_config JSONB DEFAULT '{}',
+  
+  -- HINTS
+  hint_on_wrong_click TEXT,
+  hint_delay INTEGER DEFAULT 5000,
+  
+  -- STATE
+  required_simulator_state JSONB,
+  state_changes_after JSONB,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  
+  UNIQUE(lesson_id, step_order)
+);
+
+================================================================================
+-- TABLE: jira_docs_embeddings
+-- Vectorized Jira documentation for RAG
+================================================================================
+CREATE TABLE jira_docs_embeddings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  content TEXT NOT NULL,
+  content_hash TEXT GENERATED ALWAYS AS (md5(content)) STORED,
+  embedding vector(1536),
+  source_url TEXT NOT NULL,
+  page_title TEXT,
+  section_title TEXT,
+  chunk_index INTEGER,
+  scraped_at TIMESTAMPTZ DEFAULT NOW(),
+  
+  UNIQUE(content_hash)
+);
+
+CREATE INDEX idx_docs_embedding ON jira_docs_embeddings 
+USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+
+================================================================================
+-- TABLE: lesson_evaluations
+-- Weekly evaluation results
+================================================================================
+CREATE TABLE lesson_evaluations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  lesson_id UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  
+  overall_score INTEGER,
+  ui_accuracy_score INTEGER,
+  terminology_score INTEGER,
+  feature_availability_score INTEGER,
+  procedure_accuracy_score INTEGER,
+  coverage_score INTEGER,
+  
+  ui_issues JSONB DEFAULT '[]',
+  terminology_changes JSONB DEFAULT '[]',
+  deprecated_features JSONB DEFAULT '[]',
+  outdated_steps JSONB DEFAULT '[]',
+  missing_features JSONB DEFAULT '[]',
+  
+  recommended_action TEXT,
+  suggested_changes JSONB DEFAULT '[]',
+  priority TEXT,
+  
+  -- Voice-over impact
+  audio_regen_needed BOOLEAN DEFAULT FALSE,
+  affected_steps JSONB DEFAULT '[]',
+  
+  related_doc_links JSONB DEFAULT '[]',
+  raw_agent_output TEXT,
+  evaluated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+================================================================================
+-- TABLE: design_diffs
+-- UI comparison results
+================================================================================
+CREATE TABLE design_diffs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  component_id TEXT NOT NULL,
+  component_name TEXT NOT NULL,
+  component_file TEXT NOT NULL,
+  
+  similarity_score INTEGER,
+  differences JSONB NOT NULL DEFAULT '[]',
+  new_elements JSONB DEFAULT '[]',
+  removed_elements JSONB DEFAULT '[]',
+  
+  css_token_updates JSONB DEFAULT '[]',
+  component_code_updates JSONB DEFAULT '[]',
+  
+  status TEXT DEFAULT 'pending',
+  github_pr_url TEXT,
+  priority TEXT,
+  
+  jira_screenshot_url TEXT,
+  simulator_screenshot_url TEXT,
+  
+  detected_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+================================================================================
+-- TABLE: workflow_runs
+-- Execution tracking
+================================================================================
+CREATE TABLE workflow_runs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workflow_name TEXT NOT NULL,
+  status TEXT DEFAULT 'running',
+  total_items INTEGER DEFAULT 0,
+  processed_items INTEGER DEFAULT 0,
+  error_message TEXT,
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+
+================================================================================
+-- FUNCTIONS
+================================================================================
+
+-- Search similar docs for RAG
+CREATE OR REPLACE FUNCTION search_jira_docs(
+  query_embedding vector(1536),
+  match_count INT DEFAULT 5
+)
+RETURNS TABLE (
+  id UUID,
+  content TEXT,
+  source_url TEXT,
+  similarity FLOAT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    jde.id,
+    jde.content,
+    jde.source_url,
+    1 - (jde.embedding <=> query_embedding) AS similarity
+  FROM jira_docs_embeddings jde
+  ORDER BY jde.embedding <=> query_embedding
+  LIMIT match_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Get lesson with all steps
+CREATE OR REPLACE FUNCTION get_lesson_with_steps(p_lesson_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_build_object(
+    'lesson', row_to_json(l),
+    'steps', (
+      SELECT json_agg(row_to_json(s) ORDER BY s.step_order)
+      FROM lesson_steps s WHERE s.lesson_id = l.id
+    )
+  ) INTO result
+  FROM lessons l WHERE l.id = p_lesson_id;
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
+================================================================================
+-- SAMPLE DATA (for testing)
+================================================================================
+
+INSERT INTO lessons (slug, module_id, title, description, sort_order, is_published)
+VALUES 
+('lesson-01-navigation', 'module-a', 'Jira Navigation Basics', 'Learn the Jira interface', 1, true),
+('lesson-02-projects', 'module-a', 'Understanding Projects', 'Project types and templates', 2, true),
+('lesson-03-issues', 'module-a', 'Working with Issues', 'Create and manage issues', 3, true);
+
+-- Sample steps for lesson 1
+INSERT INTO lesson_steps (lesson_id, step_order, narration_text, target_selector, highlight_style)
+SELECT id, 1, 
+  'Welcome to Jira! Let us start by exploring the global navigation bar at the top.',
+  '[data-testid="atlassian-navigation"]',
+  'glow'
+FROM lessons WHERE slug = 'lesson-01-navigation';
+
+INSERT INTO lesson_steps (lesson_id, step_order, narration_text, target_selector, highlight_style, hint_on_wrong_click)
+SELECT id, 2,
+  'Now click on the project switcher to see all available projects.',
+  '[data-testid="project-switcher"]',
+  'pulse',
+  'Look for the dropdown in the sidebar showing your current project name.'
+FROM lessons WHERE slug = 'lesson-01-navigation';
+
+================================================================================

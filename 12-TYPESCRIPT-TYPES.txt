@@ -1,0 +1,280 @@
+================================================================================
+TYPESCRIPT TYPES
+Place in: types/ directory
+================================================================================
+
+// types/database.ts
+================================================================================
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Project {
+  id: string;
+  key: string;
+  name: string;
+  type: 'software' | 'business';
+  description?: string;
+  lead: User;
+  avatar?: string;
+  category?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Epic {
+  id: string;
+  key: string;
+  name: string;
+  color: string;
+  status: 'todo' | 'in-progress' | 'done';
+}
+
+export interface Sprint {
+  id: string;
+  name: string;
+  goal?: string;
+  startDate: string;
+  endDate: string;
+  status: 'future' | 'active' | 'closed';
+}
+
+export interface Issue {
+  id: string;
+  key: string;
+  summary: string;
+  description?: string;
+  type: IssueType;
+  status: IssueStatus;
+  priority: IssuePriority;
+  assignee: User | null;
+  reporter: User;
+  epic: Epic | null;
+  storyPoints: number | null;
+  labels: string[];
+  sprint: Sprint | null;
+  parentId?: string;
+  subtasks?: Issue[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type IssueType = 'story' | 'task' | 'bug' | 'epic' | 'subtask';
+export type IssueStatus = 'todo' | 'in-progress' | 'in-review' | 'done';
+export type IssuePriority = 'highest' | 'high' | 'medium' | 'low' | 'lowest';
+
+export interface Column {
+  id: string;
+  name: string;
+  status: IssueStatus;
+  order: number;
+}
+
+export interface Comment {
+  id: string;
+  issueId: string;
+  author: User;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+// types/lesson.ts
+================================================================================
+
+export interface Lesson {
+  id: string;
+  slug: string;
+  moduleId: string;
+  title: string;
+  description: string;
+  objectives: string[];
+  skillLevel: 'beginner' | 'intermediate' | 'advanced';
+  estimatedDuration: number; // minutes
+  prerequisites: string[]; // lesson IDs
+  sortOrder: number;
+  isPublished: boolean;
+  evaluationScore: number;
+  voiceOverStatus: 'pending' | 'generating' | 'ready' | 'failed';
+  voiceOverGeneratedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LessonStep {
+  id: string;
+  lessonId: string;
+  stepOrder: number;
+  
+  // Voice-over
+  narrationText: string;
+  audioUrl: string | null;
+  audioDuration: number | null; // milliseconds
+  
+  // Visual guidance
+  targetSelector: string;
+  highlightStyle: 'pulse' | 'glow' | 'outline' | 'arrow';
+  highlightColor: string;
+  
+  // Interaction
+  expectedAction: 'click' | 'type' | 'drag' | 'hover';
+  actionValue?: string;
+  delayAfterAudio: number; // milliseconds
+  allowSkip: boolean;
+  
+  // Validation
+  validationType: 'element_clicked' | 'value_entered' | 'state_changed';
+  validationConfig: Record<string, unknown>;
+  
+  // Hints
+  hintOnWrongClick: string | null;
+  hintDelay: number; // milliseconds
+  
+  // State management
+  requiredSimulatorState: Record<string, unknown> | null;
+  stateChangesAfter: Record<string, unknown> | null;
+  
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LessonWithSteps extends Lesson {
+  steps: LessonStep[];
+}
+
+export interface Module {
+  id: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+  lessons: Lesson[];
+}
+
+
+// types/progress.ts
+================================================================================
+
+export interface UserProgress {
+  id: string;
+  userId: string;
+  lessonId: string;
+  lastStepId: string | null;
+  completed: boolean;
+  completedAt: string | null;
+  timeSpentSeconds: number;
+  wrongClicks: number;
+  attempts: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  userId: string;
+  achievementId: string;
+  unlockedAt: string;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  criteria: {
+    type: 'lessons_completed' | 'streak_days' | 'perfect_score' | 'speed_run';
+    value: number;
+  };
+}
+
+export interface UserStats {
+  totalLessonsCompleted: number;
+  totalTimeSpent: number; // seconds
+  currentStreak: number; // days
+  longestStreak: number;
+  averageAccuracy: number; // percentage
+  achievementsUnlocked: number;
+}
+
+
+// types/simulator.ts
+================================================================================
+
+export interface SimulatorState {
+  // Current context
+  currentProject: Project | null;
+  currentView: 'board' | 'backlog' | 'timeline' | 'settings';
+  currentIssue: Issue | null;
+  
+  // UI state
+  sidebarCollapsed: boolean;
+  issueDetailOpen: boolean;
+  createModalOpen: boolean;
+  searchDialogOpen: boolean;
+  
+  // Data
+  projects: Project[];
+  issues: Issue[];
+  columns: Column[];
+  sprints: Sprint[];
+  users: User[];
+  epics: Epic[];
+  
+  // Filters
+  filters: BoardFilters;
+}
+
+export interface BoardFilters {
+  assignee: string | null;
+  type: IssueType | null;
+  epic: string | null;
+  sprint: string | null;
+  search: string;
+  labels: string[];
+}
+
+
+// types/api.ts
+================================================================================
+
+export interface ApiResponse<T> {
+  data: T;
+  error: null;
+}
+
+export interface ApiError {
+  data: null;
+  error: {
+    message: string;
+    code: string;
+  };
+}
+
+export type ApiResult<T> = ApiResponse<T> | ApiError;
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+
+// types/index.ts
+================================================================================
+
+export * from './database';
+export * from './lesson';
+export * from './progress';
+export * from './simulator';
+export * from './api';
