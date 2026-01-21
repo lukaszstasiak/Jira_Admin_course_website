@@ -1,0 +1,578 @@
+# CURSOR AI - COMPLETE PROJECT INSTRUCTIONS
+# Jira Cloud Learning Platform with Voice-Over Guided Learning
+# ============================================================
+
+## HOW TO USE THIS FILE
+
+1. Create a new folder for your project
+2. Open it in Cursor
+3. Create a file called `CURSOR-INSTRUCTIONS.md` and paste this entire content
+4. Tell Cursor: "Read CURSOR-INSTRUCTIONS.md and build this application step by step"
+
+Alternatively, add this to `.cursorrules` file in your project root.
+
+---
+
+## PROJECT OVERVIEW
+
+Build an interactive Jira Cloud learning platform where users learn Jira by clicking through a high-fidelity simulator (95%+ visual match to real Jira) while hearing AI-generated voice instructions.
+
+**Core Experience:**
+1. User selects a lesson
+2. Jira simulator loads with voice-over overlay
+3. Voice says "Click on Project Settings in the sidebar..."
+4. Target element highlights (rest of UI dimmed)
+5. User clicks highlighted element
+6. Next step loads with new voice instruction
+7. Progress saved, achievements unlocked
+
+---
+
+## TECH STACK
+
+```
+Frontend:        Next.js 14 (App Router), TypeScript, Tailwind CSS
+State:           Zustand
+Database:        Supabase (PostgreSQL + Auth)
+ORM:             Prisma
+Voice Storage:   Cloudflare R2 (audio files)
+Deployment:      Vercel
+```
+
+---
+
+## PROJECT STRUCTURE
+
+```
+jira-learning-platform/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/page.tsx
+│   │   ├── signup/page.tsx
+│   │   └── layout.tsx
+│   ├── (dashboard)/
+│   │   ├── page.tsx                    # Dashboard home
+│   │   ├── lessons/
+│   │   │   ├── page.tsx                # Lesson catalog
+│   │   │   └── [lessonId]/page.tsx     # Lesson player
+│   │   ├── progress/page.tsx
+│   │   └── layout.tsx
+│   ├── api/
+│   │   ├── lessons/
+│   │   │   ├── route.ts
+│   │   │   └── [lessonId]/route.ts
+│   │   └── progress/route.ts
+│   ├── layout.tsx
+│   ├── page.tsx                        # Landing page
+│   └── globals.css
+├── components/
+│   ├── ui/                             # Shared UI (Button, Card, Modal, etc.)
+│   ├── simulator/                      # JIRA SIMULATOR
+│   │   ├── core/
+│   │   │   ├── GlobalNav.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── ProjectSwitcher.tsx
+│   │   │   └── UserMenu.tsx
+│   │   ├── views/
+│   │   │   ├── BoardView/
+│   │   │   │   ├── BoardView.tsx
+│   │   │   │   ├── BoardColumn.tsx
+│   │   │   │   └── IssueCard.tsx
+│   │   │   └── IssueDetail/
+│   │   │       └── IssueDetailPanel.tsx
+│   │   ├── shared/
+│   │   │   ├── CreateIssueModal.tsx
+│   │   │   ├── IssueTypeIcon.tsx
+│   │   │   └── PriorityIcon.tsx
+│   │   ├── interaction/                # VOICE-OVER SYSTEM
+│   │   │   ├── GuidedModeOverlay.tsx
+│   │   │   ├── VoiceOverPlayer.tsx
+│   │   │   └── Highlighter.tsx
+│   │   └── JiraSimulator.tsx
+│   └── lessons/
+│       ├── LessonPlayer.tsx
+│       └── LessonCard.tsx
+├── stores/
+│   ├── simulatorStore.ts
+│   └── lessonStore.ts
+├── types/
+│   ├── database.ts
+│   ├── simulator.ts
+│   └── lesson.ts
+├── styles/
+│   ├── globals.css
+│   └── atlassian-tokens.css
+├── lib/
+│   └── supabase/
+│       ├── client.ts
+│       └── server.ts
+├── config/
+│   └── lessons/                        # Lesson JSON files
+└── public/
+    └── images/
+```
+
+---
+
+## STEP-BY-STEP BUILD ORDER
+
+### Phase 1: Setup (Do First)
+1. `npx create-next-app@latest jira-learning-platform --typescript --tailwind --app`
+2. Install dependencies:
+   ```bash
+   npm install @supabase/supabase-js @supabase/ssr zustand framer-motion lucide-react clsx tailwind-merge
+   ```
+3. Set up Supabase project and add env variables
+4. Create the folder structure above
+
+### Phase 2: Jira Simulator (Core Product)
+Build these components to match real Jira Cloud 2025:
+
+1. **GlobalNav** - Blue top bar (56px height, #0055CC background)
+2. **Sidebar** - Left navigation (240px width)
+3. **BoardView** - Kanban columns
+4. **IssueCard** - Cards on the board
+5. **IssueDetailPanel** - Slide-out panel
+6. **CreateIssueModal** - Issue creation form
+
+### Phase 3: Voice-Over System
+1. **VoiceOverPlayer** - Audio playback with subtitles
+2. **Highlighter** - Element highlighting (pulse/glow effects)
+3. **GuidedModeOverlay** - Combines player + highlighter + click validation
+4. **LessonPlayer** - Orchestrates the full lesson experience
+
+### Phase 4: Lesson System & Progress
+1. Lesson catalog page
+2. Progress tracking
+3. Achievements
+
+---
+
+## CRITICAL DESIGN SPECS
+
+### Atlassian Colors (use these exactly)
+```css
+:root {
+  --atlassian-blue-600: #0C66E4;
+  --atlassian-blue-700: #0055CC;    /* Global nav background */
+  --atlassian-neutral-0: #FFFFFF;
+  --atlassian-neutral-100: #F7F8F9; /* Page background */
+  --atlassian-neutral-200: #F1F2F4; /* Board column background */
+  --atlassian-neutral-300: #DCDFE4; /* Borders */
+  --atlassian-neutral-600: #626F86; /* Secondary text */
+  --atlassian-neutral-900: #172B4D; /* Primary text */
+}
+```
+
+### Key Dimensions
+- Global nav height: 56px
+- Sidebar width: 240px
+- Board column width: 280px
+- Issue card padding: 12px
+
+---
+
+## DATA-TESTID SELECTORS (Required for Voice-Over Targeting)
+
+Every interactive element needs a data-testid:
+
+```tsx
+// Global Nav
+<nav data-testid="atlassian-navigation">
+<button data-testid="global-create-button">
+<button data-testid="search-button">
+<button data-testid="profile-avatar">
+
+// Sidebar
+<aside data-testid="sidebar">
+<button data-testid="project-switcher">
+<a data-testid="nav-board">
+<a data-testid="nav-backlog">
+<a data-testid="sidebar-project-settings">
+
+// Board
+<div data-testid="software-board">
+<div data-testid="board-column-todo">
+<div data-testid="board-card">
+
+// Issue Detail
+<div data-testid="issue-layout">
+<h1 data-testid="issue-summary">
+<div data-testid="issue-status-dropdown">
+```
+
+---
+
+## SUPABASE SCHEMA (Run in SQL Editor)
+
+```sql
+-- Enable vector extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Lessons table
+CREATE TABLE lessons (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug TEXT UNIQUE NOT NULL,
+  module_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  objectives JSONB DEFAULT '[]',
+  skill_level TEXT DEFAULT 'beginner',
+  estimated_duration INTEGER,
+  sort_order INTEGER DEFAULT 0,
+  is_published BOOLEAN DEFAULT FALSE,
+  voice_over_status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Lesson steps table (KEY for voice-over)
+CREATE TABLE lesson_steps (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  lesson_id UUID REFERENCES lessons(id) ON DELETE CASCADE,
+  step_order INTEGER NOT NULL,
+  narration_text TEXT NOT NULL,
+  audio_url TEXT,
+  audio_duration INTEGER,
+  target_selector TEXT NOT NULL,
+  highlight_style TEXT DEFAULT 'pulse',
+  expected_action TEXT DEFAULT 'click',
+  delay_after_audio INTEGER DEFAULT 300,
+  hint_on_wrong_click TEXT,
+  UNIQUE(lesson_id, step_order)
+);
+
+-- User progress
+CREATE TABLE user_progress (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  lesson_id UUID REFERENCES lessons(id) ON DELETE CASCADE,
+  completed BOOLEAN DEFAULT FALSE,
+  time_spent_seconds INTEGER DEFAULT 0,
+  UNIQUE(user_id, lesson_id)
+);
+```
+
+---
+
+## ZUSTAND STORES
+
+### simulatorStore.ts
+```typescript
+import { create } from 'zustand';
+
+interface SimulatorState {
+  currentView: 'board' | 'backlog' | 'settings';
+  sidebarCollapsed: boolean;
+  issueDetailOpen: boolean;
+  currentIssue: Issue | null;
+  issues: Issue[];
+  
+  setCurrentView: (view: SimulatorState['currentView']) => void;
+  openIssueDetail: (issue: Issue) => void;
+  closeIssueDetail: () => void;
+  moveIssue: (issueId: string, toStatus: string) => void;
+}
+
+export const useSimulatorStore = create<SimulatorState>((set) => ({
+  currentView: 'board',
+  sidebarCollapsed: false,
+  issueDetailOpen: false,
+  currentIssue: null,
+  issues: [],
+  
+  setCurrentView: (view) => set({ currentView: view }),
+  openIssueDetail: (issue) => set({ currentIssue: issue, issueDetailOpen: true }),
+  closeIssueDetail: () => set({ currentIssue: null, issueDetailOpen: false }),
+  moveIssue: (issueId, toStatus) => set((state) => ({
+    issues: state.issues.map(i => 
+      i.id === issueId ? { ...i, status: toStatus } : i
+    )
+  })),
+}));
+```
+
+### lessonStore.ts
+```typescript
+import { create } from 'zustand';
+
+interface LessonState {
+  currentStepIndex: number;
+  canInteract: boolean;
+  audioComplete: boolean;
+  showHint: boolean;
+  
+  nextStep: () => void;
+  setCanInteract: (can: boolean) => void;
+  setAudioComplete: (complete: boolean) => void;
+  showHintMessage: (msg: string) => void;
+}
+
+export const useLessonStore = create<LessonState>((set) => ({
+  currentStepIndex: 0,
+  canInteract: false,
+  audioComplete: false,
+  showHint: false,
+  
+  nextStep: () => set((s) => ({ 
+    currentStepIndex: s.currentStepIndex + 1,
+    canInteract: false,
+    audioComplete: false 
+  })),
+  setCanInteract: (can) => set({ canInteract: can }),
+  setAudioComplete: (complete) => set({ audioComplete: complete, canInteract: complete }),
+  showHintMessage: () => set({ showHint: true }),
+}));
+```
+
+---
+
+## KEY REACT COMPONENTS
+
+### VoiceOverPlayer.tsx
+```tsx
+'use client';
+import { useRef, useEffect, useState } from 'react';
+
+interface Props {
+  audioUrl: string | null;
+  narrationText: string;
+  onAudioComplete: () => void;
+  onSkip: () => void;
+}
+
+export function VoiceOverPlayer({ audioUrl, narrationText, onAudioComplete, onSkip }: Props) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.play().catch(() => {
+        // If autoplay blocked, enable interaction anyway
+        setTimeout(onAudioComplete, 2000);
+      });
+    } else {
+      setTimeout(onAudioComplete, 2000);
+    }
+  }, [audioUrl]);
+
+  return (
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-6 py-4 rounded-lg max-w-2xl z-50">
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onPlay={() => setIsPlaying(true)}
+          onEnded={() => {
+            setIsPlaying(false);
+            setTimeout(onAudioComplete, 300);
+          }}
+        />
+      )}
+      
+      <div className="flex items-center gap-4">
+        <span className="text-2xl">{isPlaying ? '🔊' : '🔈'}</span>
+        <p className="flex-1">{narrationText}</p>
+        <button onClick={onSkip} className="px-3 py-1 bg-gray-700 rounded">
+          Skip →
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Highlighter.tsx
+```tsx
+'use client';
+import { useEffect, useState } from 'react';
+
+interface Props {
+  selector: string;
+  style: 'pulse' | 'glow';
+  enabled: boolean;
+}
+
+export function Highlighter({ selector, style, enabled }: Props) {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    const el = document.querySelector(selector);
+    if (el) setRect(el.getBoundingClientRect());
+  }, [selector]);
+
+  if (!rect) return null;
+
+  return (
+    <div
+      className={`fixed pointer-events-none z-40 border-3 rounded transition-all ${
+        style === 'pulse' ? 'border-blue-500 animate-pulse' : 'border-blue-400 shadow-[0_0_20px_rgba(0,85,204,0.5)]'
+      } ${enabled ? 'opacity-100' : 'opacity-50'}`}
+      style={{
+        top: rect.top - 4,
+        left: rect.left - 4,
+        width: rect.width + 8,
+        height: rect.height + 8,
+      }}
+    />
+  );
+}
+```
+
+### GuidedModeOverlay.tsx
+```tsx
+'use client';
+import { VoiceOverPlayer } from './VoiceOverPlayer';
+import { Highlighter } from './Highlighter';
+import { useLessonStore } from '@/stores/lessonStore';
+
+interface Step {
+  narrationText: string;
+  audioUrl: string | null;
+  targetSelector: string;
+  highlightStyle: 'pulse' | 'glow';
+  hintOnWrongClick: string | null;
+}
+
+interface Props {
+  steps: Step[];
+  onComplete: () => void;
+}
+
+export function GuidedModeOverlay({ steps, onComplete }: Props) {
+  const { currentStepIndex, canInteract, nextStep, setCanInteract, setAudioComplete } = useLessonStore();
+  const step = steps[currentStepIndex];
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!canInteract) {
+      e.stopPropagation();
+      return;
+    }
+
+    const target = document.querySelector(step.targetSelector);
+    if (target?.contains(e.target as Node)) {
+      if (currentStepIndex === steps.length - 1) {
+        onComplete();
+      } else {
+        nextStep();
+      }
+    } else {
+      // Wrong click - show hint
+      alert(step.hintOnWrongClick || 'Try clicking the highlighted element');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-30" onClick={handleClick}>
+      {/* Dim overlay */}
+      <div className="absolute inset-0 bg-black/40" />
+
+      {/* Highlighter */}
+      <Highlighter
+        selector={step.targetSelector}
+        style={step.highlightStyle}
+        enabled={canInteract}
+      />
+
+      {/* Voice player */}
+      <VoiceOverPlayer
+        audioUrl={step.audioUrl}
+        narrationText={step.narrationText}
+        onAudioComplete={() => setAudioComplete(true)}
+        onSkip={() => setCanInteract(true)}
+      />
+
+      {/* Progress */}
+      <div className="fixed top-4 right-4 bg-white px-4 py-2 rounded shadow z-50">
+        Step {currentStepIndex + 1} of {steps.length}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## SAMPLE LESSON DATA
+
+```json
+{
+  "id": "lesson-01",
+  "slug": "navigating-jira",
+  "title": "Navigating the Jira Interface",
+  "steps": [
+    {
+      "stepOrder": 1,
+      "narrationText": "Welcome to Jira! The blue bar at the top is the global navigation.",
+      "audioUrl": null,
+      "targetSelector": "[data-testid='atlassian-navigation']",
+      "highlightStyle": "glow",
+      "hintOnWrongClick": "Look at the blue bar at the very top."
+    },
+    {
+      "stepOrder": 2,
+      "narrationText": "The sidebar on the left helps you navigate within your project. Click on Board.",
+      "audioUrl": null,
+      "targetSelector": "[data-testid='nav-board']",
+      "highlightStyle": "pulse",
+      "hintOnWrongClick": "Look for Board in the left sidebar."
+    }
+  ]
+}
+```
+
+---
+
+## ENVIRONMENT VARIABLES (.env.local)
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_AUDIO_CDN_URL=https://your-bucket.r2.cloudflarestorage.com
+```
+
+---
+
+## VERIFICATION CHECKLIST
+
+After building, verify:
+
+- [ ] GlobalNav is exactly 56px tall with #0055CC background
+- [ ] Sidebar is 240px wide
+- [ ] Board columns are 280px wide
+- [ ] All elements have data-testid attributes
+- [ ] Voice player shows subtitles
+- [ ] Highlighting pulses when interaction is enabled
+- [ ] Wrong clicks show hints
+- [ ] Progress advances on correct clicks
+
+---
+
+## WHAT THIS FILE DOESN'T COVER (Separate System)
+
+The n8n workflows for:
+- Weekly lesson content evaluation
+- Daily design sync (screenshot comparison)
+- Voice-over audio generation
+
+These run SEPARATELY from your web app. Build the web app first, then set up n8n later.
+
+---
+
+## PROMPT TO GIVE CURSOR
+
+After creating this file, tell Cursor:
+
+```
+Read CURSOR-INSTRUCTIONS.md completely. This is a Jira learning platform with voice-guided lessons.
+
+Start by:
+1. Setting up the Next.js project with the exact folder structure shown
+2. Creating the Atlassian color tokens in globals.css
+3. Building the GlobalNav component that matches Jira Cloud exactly
+
+Build one component at a time. After each component, show me the result before moving on.
+```
+
+---
+
+END OF CURSOR INSTRUCTIONS
