@@ -1,524 +1,610 @@
-================================================================================
-LESSON DEFINITIONS - 30 LESSONS ACROSS 5 MODULES
-================================================================================
+JIRA / ATLASSIAN ADMINISTRATOR, CONSULTANT & PROGRAMMER — COURSE PLAN (Jira Cloud)
+==========================================================================================
 
-These JSON configurations define each lesson's content, steps, and voice-over.
-Place in: config/lessons/module-X/lesson-XX.json
+NOTE
+----
+This plan is designed specifically for ADMIN CONSOLE work (Atlassian Administration + Jira settings + Project settings),
+not end‑user Jira usage. The Admin track is the primary track and is structured for an interactive “Admin Panel Simulator”.
 
-================================================================================
-MODULE A: JIRA FUNDAMENTALS (Lessons 1-6)
-================================================================================
+------------------------------------------------------------------------------------------
+TRACK 1 (PRIMARY): JIRA / ATLASSIAN ADMIN (CLOUD) — SIMULATOR-READY LESSONS
+------------------------------------------------------------------------------------------
 
-LESSON 01: Navigating the Jira Interface
------------------------------------------
-{
-  "id": "lesson-01",
-  "slug": "navigating-jira-interface",
-  "moduleId": "module-a",
-  "title": "Navigating the Jira Interface",
-  "description": "Learn the core components of Jira's interface including the global navigation, sidebar, and main content areas.",
-  "objectives": [
-    "Identify the main areas of the Jira interface",
-    "Use the global navigation bar",
-    "Navigate using the sidebar",
-    "Access project settings"
-  ],
-  "skillLevel": "beginner",
-  "estimatedDuration": 5,
-  "prerequisites": [],
-  "sortOrder": 1,
-  "simulatorState": {
-    "currentView": "board",
-    "sidebarCollapsed": false,
-    "currentProject": "DEMO"
-  },
-  "steps": [
-    {
-      "stepOrder": 1,
-      "narrationText": "Welcome to Jira! Let's start by exploring the interface. At the top, you'll see the global navigation bar in blue.",
-      "targetSelector": "[data-testid='atlassian-navigation']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "delayAfterAudio": 500,
-      "hintOnWrongClick": "Look at the blue bar at the very top of the screen."
-    },
-    {
-      "stepOrder": 2,
-      "narrationText": "On the left side, you'll find the sidebar. This is where you navigate within your project. Click anywhere on it.",
-      "targetSelector": "[data-testid='sidebar']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "delayAfterAudio": 300,
-      "hintOnWrongClick": "The sidebar is the white panel on the left side of the screen."
-    },
-    {
-      "stepOrder": 3,
-      "narrationText": "The sidebar shows different views for your project. Click on Board to see your Kanban board.",
-      "targetSelector": "[data-testid='nav-board']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "delayAfterAudio": 300,
-      "hintOnWrongClick": "Look for 'Board' with a columns icon in the sidebar."
-    },
-    {
-      "stepOrder": 4,
-      "narrationText": "The main area shows your board with columns for different statuses. This is where you'll manage your work.",
-      "targetSelector": "[data-testid='software-board']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "delayAfterAudio": 500,
-      "hintOnWrongClick": "Click anywhere on the board with the columns."
-    },
-    {
-      "stepOrder": 5,
-      "narrationText": "Finally, let's look at project settings. Click on Project settings at the bottom of the sidebar.",
-      "targetSelector": "[data-testid='sidebar-project-settings']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "delayAfterAudio": 300,
-      "hintOnWrongClick": "Scroll down in the sidebar and look for 'Project settings' with a gear icon."
-    },
-    {
-      "stepOrder": 6,
-      "narrationText": "Great job! You've learned the main areas of Jira. The navigation bar, sidebar, and main content area work together to help you manage projects.",
-      "targetSelector": "[data-testid='atlassian-navigation']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "delayAfterAudio": 500,
-      "hintOnWrongClick": "Click the navigation bar to complete this lesson."
-    }
-  ]
-}
+Simulator “Rooms” (one-screen lessons)
+--------------------------------------
+1) Atlassian Administration (admin.atlassian.com)
+   - Directory: Users, Groups
+   - Admin roles / product access
+   - Security / audit log (org level)
 
+2) Jira settings (Jira Cloud)
+   - Work items
+   - System
+   - Products (where applicable)
+   - Apps (where applicable)
 
-LESSON 02: Understanding Projects
----------------------------------
-{
-  "id": "lesson-02",
-  "slug": "understanding-projects",
-  "moduleId": "module-a",
-  "title": "Understanding Projects",
-  "description": "Learn about Jira project types, how to switch between projects, and project organization.",
-  "objectives": [
-    "Understand different project types",
-    "Switch between projects",
-    "View project details"
-  ],
-  "skillLevel": "beginner",
-  "estimatedDuration": 4,
-  "prerequisites": ["lesson-01"],
-  "sortOrder": 2,
-  "steps": [
-    {
-      "stepOrder": 1,
-      "narrationText": "Every Jira workspace contains projects. Click on the project name in the sidebar to see the project switcher.",
-      "targetSelector": "[data-testid='project-switcher']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look at the top of the sidebar where the current project name is shown."
-    },
-    {
-      "stepOrder": 2,
-      "narrationText": "The project switcher shows all projects you have access to. You can search or click to switch projects.",
-      "targetSelector": "[data-testid='project-switcher-dropdown']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "hintOnWrongClick": "The dropdown should be open. Click on any project in the list."
-    },
-    {
-      "stepOrder": 3,
-      "narrationText": "Projects can be software projects for development teams, or business projects for other teams. Notice the project type indicator.",
-      "targetSelector": "[data-testid='sidebar']",
-      "highlightStyle": "outline",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click anywhere on the sidebar."
-    },
-    {
-      "stepOrder": 4,
-      "narrationText": "To see project details and configuration, click on Project settings.",
-      "targetSelector": "[data-testid='sidebar-project-settings']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look for Project settings at the bottom of the sidebar."
-    }
-  ]
-}
+3) Project settings (Company-managed Jira + Jira Service Management)
+   - Permissions, Workflows, Request types, Portal, SLAs, Queues, Automation, Knowledge base
 
+4) Confluence admin (for knowledge base enablement)
+   - Global permissions, Space permissions entry points
 
-LESSON 03: Creating Your First Issue
-------------------------------------
-{
-  "id": "lesson-03",
-  "slug": "creating-first-issue",
-  "moduleId": "module-a",
-  "title": "Creating Your First Issue",
-  "description": "Learn how to create issues in Jira including stories, tasks, and bugs.",
-  "objectives": [
-    "Open the create issue modal",
-    "Fill in required fields",
-    "Create different issue types"
-  ],
-  "skillLevel": "beginner",
-  "estimatedDuration": 6,
-  "prerequisites": ["lesson-01"],
-  "sortOrder": 3,
-  "steps": [
-    {
-      "stepOrder": 1,
-      "narrationText": "To create a new issue, click the Create button in the navigation bar.",
-      "targetSelector": "[data-testid='global-create-button']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look for the blue Create button in the top navigation bar."
-    },
-    {
-      "stepOrder": 2,
-      "narrationText": "The create issue modal opens. First, make sure the correct project is selected.",
-      "targetSelector": "[data-testid='create-issue-modal']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "hintOnWrongClick": "The modal should be open. Click anywhere on it."
-    },
-    {
-      "stepOrder": 3,
-      "narrationText": "Choose an issue type. Stories are for user-facing features, Tasks for work items, and Bugs for defects.",
-      "targetSelector": "[data-testid='issue-type-select']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look for the Issue type dropdown in the form."
-    },
-    {
-      "stepOrder": 4,
-      "narrationText": "Enter a clear summary that describes what needs to be done. This is the issue title.",
-      "targetSelector": "[data-testid='summary-input']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on the Summary text field."
-    },
-    {
-      "stepOrder": 5,
-      "narrationText": "Add a description with more details. You can use formatting, attach files, and mention team members.",
-      "targetSelector": "[data-testid='description-field']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on the Description field below Summary."
-    },
-    {
-      "stepOrder": 6,
-      "narrationText": "When ready, click Create to save your issue. It will appear on the board immediately.",
-      "targetSelector": "[data-testid='create-submit-button']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click the blue Create button at the bottom of the modal."
-    }
-  ]
-}
+5) Assets (JSM / “Assets” formerly Insight)
+   - Object schemas, object types, attributes, imports, roles/permissions, automation, AQL search
 
-
-LESSON 04: Working with the Board
----------------------------------
-{
-  "id": "lesson-04",
-  "slug": "working-with-board",
-  "moduleId": "module-a",
-  "title": "Working with the Board",
-  "description": "Learn to use the Kanban board to visualize and manage your work.",
-  "objectives": [
-    "Understand board columns",
-    "Move issues between columns",
-    "Use quick filters"
-  ],
-  "skillLevel": "beginner",
-  "estimatedDuration": 5,
-  "prerequisites": ["lesson-03"],
-  "sortOrder": 4,
-  "steps": [
-    {
-      "stepOrder": 1,
-      "narrationText": "The board shows your work organized in columns. Each column represents a status like To Do, In Progress, or Done.",
-      "targetSelector": "[data-testid='software-board']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click anywhere on the board."
-    },
-    {
-      "stepOrder": 2,
-      "narrationText": "Issues are shown as cards. Click on any card to see its details.",
-      "targetSelector": "[data-testid='board-card']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on any issue card on the board."
-    },
-    {
-      "stepOrder": 3,
-      "narrationText": "To move an issue, you can drag it to another column. This changes its status automatically.",
-      "targetSelector": "[data-testid='board-column-in-progress']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on the In Progress column."
-    },
-    {
-      "stepOrder": 4,
-      "narrationText": "Use quick filters to focus on specific issues. Click the filter button to see options.",
-      "targetSelector": "[data-testid='board-filter-button']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look for the filter icon above the board."
-    }
-  ]
-}
-
-
-LESSON 05: Issue Details
-------------------------
-{
-  "id": "lesson-05",
-  "slug": "issue-details",
-  "moduleId": "module-a",
-  "title": "Issue Details",
-  "description": "Learn to view and edit issue details, add comments, and track activity.",
-  "objectives": [
-    "Open the issue detail panel",
-    "Edit issue fields",
-    "Add comments"
-  ],
-  "skillLevel": "beginner",
-  "estimatedDuration": 5,
-  "prerequisites": ["lesson-04"],
-  "sortOrder": 5,
-  "steps": [
-    {
-      "stepOrder": 1,
-      "narrationText": "Click on any issue card to open its detail panel.",
-      "targetSelector": "[data-testid='board-card']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on any issue card on the board."
-    },
-    {
-      "stepOrder": 2,
-      "narrationText": "The detail panel shows all information about the issue. You can edit the title by clicking on it.",
-      "targetSelector": "[data-testid='issue-summary']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on the issue title at the top of the panel."
-    },
-    {
-      "stepOrder": 3,
-      "narrationText": "The description area lets you add detailed information. Click to edit.",
-      "targetSelector": "[data-testid='issue-description']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on the description section."
-    },
-    {
-      "stepOrder": 4,
-      "narrationText": "On the right side, you can change the status. Click the status dropdown.",
-      "targetSelector": "[data-testid='issue-status-dropdown']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look for the status badge on the right side of the panel."
-    },
-    {
-      "stepOrder": 5,
-      "narrationText": "You can assign the issue to a team member. Click the assignee field.",
-      "targetSelector": "[data-testid='issue-assignee-field']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look for Assignee on the right sidebar."
-    }
-  ]
-}
-
-
-LESSON 06: Using Search
+Design rule for lessons
 -----------------------
-{
-  "id": "lesson-06",
-  "slug": "using-search",
-  "moduleId": "module-a",
-  "title": "Using Search",
-  "description": "Learn to find issues quickly using Jira's search functionality.",
-  "objectives": [
-    "Use quick search",
-    "Search across projects",
-    "Filter search results"
-  ],
-  "skillLevel": "beginner",
-  "estimatedDuration": 4,
-  "prerequisites": ["lesson-01"],
-  "sortOrder": 6,
-  "steps": [
-    {
-      "stepOrder": 1,
-      "narrationText": "To search for issues, click the search icon in the navigation bar or press the forward slash key.",
-      "targetSelector": "[data-testid='search-button']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Look for the magnifying glass icon in the top navigation."
-    },
-    {
-      "stepOrder": 2,
-      "narrationText": "The search dialog opens. Start typing to find issues, projects, or boards.",
-      "targetSelector": "[data-testid='search-dialog']",
-      "highlightStyle": "glow",
-      "expectedAction": "click",
-      "hintOnWrongClick": "The search dialog should be open. Click inside it."
-    },
-    {
-      "stepOrder": 3,
-      "narrationText": "Search results appear as you type. Click on any result to navigate to it.",
-      "targetSelector": "[data-testid='search-results']",
-      "highlightStyle": "pulse",
-      "expectedAction": "click",
-      "hintOnWrongClick": "Click on any search result."
-    }
-  ]
-}
+- Each lesson is standalone and should not require navigating more than one “room” (one simulator screen).
+- Bigger tasks are split into multiple lessons.
 
+==========================================================================================
+A. ADMIN FOUNDATIONS & NAVIGATION (8 lessons)
+==========================================================================================
 
-================================================================================
-MODULE B: BOARD MASTERY (Lessons 7-12)
-================================================================================
+A1. Admin roles map (Org admin vs Site admin vs User access admin vs Jira admin)
+Scenario: “Inherited a site — delegate safely.”
+Room: Atlassian Admin → Directory → Users
+Interactive steps:
+  1) Open Directory → Users
+  2) Select a user
+  3) Open “Admin roles / access”
+  4) Assign “User access admin” (simulated) → Save
+Outcome: Learner understands role boundaries + least privilege.
 
-LESSON 07: Board Columns and Statuses
-{
-  "id": "lesson-07",
-  "slug": "board-columns-statuses",
-  "moduleId": "module-b",
-  "title": "Board Columns and Statuses",
-  "description": "Understand how board columns map to workflow statuses.",
-  "skillLevel": "intermediate",
-  "estimatedDuration": 5,
-  "prerequisites": ["lesson-04"],
-  "sortOrder": 7
-}
+A2. “Where am I?” console switcher — identify which console controls what
+Scenario: “PM asks to change a workflow.”
+Room: Console switcher overview (read-only)
+Steps:
+  1) Click Atlassian Admin vs Jira settings vs Project settings
+  2) Match tasks to correct console
 
-LESSON 08: Drag and Drop Workflow
-{
-  "id": "lesson-08",
-  "slug": "drag-drop-workflow",
-  "moduleId": "module-b",
-  "title": "Drag and Drop Workflow",
-  "description": "Master moving issues through your workflow.",
-  "skillLevel": "intermediate",
-  "estimatedDuration": 4,
-  "prerequisites": ["lesson-07"],
-  "sortOrder": 8
-}
+A3. Permissions mental model: global vs scheme vs project vs issue security
+Scenario: “User can’t see a project.”
+Room: Jira settings → Work items (permissions overview page)
+Steps:
+  1) Open Global permissions card
+  2) Open Permission schemes card
+  3) Open Issue security schemes card
+Outcome: Troubleshooting decision tree.
 
-LESSON 09: Board Filters
-{
-  "id": "lesson-09",
-  "slug": "board-filters",
-  "moduleId": "module-b",
-  "title": "Board Filters",
-  "description": "Learn to filter the board by assignee, label, and more.",
-  "skillLevel": "intermediate",
-  "estimatedDuration": 5,
-  "prerequisites": ["lesson-04"],
-  "sortOrder": 9
-}
+A4. Audit-first troubleshooting workflow
+Scenario: “Fields suddenly became required — who changed it?”
+Room: Jira settings → System → Audit log
+Steps:
+  1) Open Audit log
+  2) Filter by configuration area
+  3) Open entry → read actor + timestamp
 
-LESSON 10: Quick Filters
-{
-  "id": "lesson-10",
-  "slug": "quick-filters",
-  "moduleId": "module-b",
-  "title": "Quick Filters",
-  "description": "Use and customize quick filters for faster navigation.",
-  "skillLevel": "intermediate",
-  "estimatedDuration": 4,
-  "prerequisites": ["lesson-09"],
-  "sortOrder": 10
-}
+A5. Company-managed vs Team-managed impacts
+Scenario: “Team can’t find scheme screens.”
+Room: Jira settings → Work items (explainer)
+Steps:
+  1) Toggle company-managed vs team-managed examples
+  2) Identify where schemes exist / don’t exist
 
-LESSON 11: Board Settings
-{
-  "id": "lesson-11",
-  "slug": "board-settings",
-  "moduleId": "module-b",
-  "title": "Board Settings",
-  "description": "Configure your board columns and settings.",
-  "skillLevel": "intermediate",
-  "estimatedDuration": 6,
-  "prerequisites": ["lesson-07"],
-  "sortOrder": 11
-}
+A6. Safe change practice: clone → edit → associate
+Scenario: “Don’t edit a shared scheme in production.”
+Room: Jira settings → Work items → Schemes list
+Steps:
+  1) Copy scheme
+  2) Rename copy
+  3) Edit copy
+  4) Note: Association taught later (separate lesson)
 
-LESSON 12: Swimlanes
-{
-  "id": "lesson-12",
-  "slug": "swimlanes",
-  "moduleId": "module-b",
-  "title": "Swimlanes",
-  "description": "Organize your board with swimlanes for better visibility.",
-  "skillLevel": "intermediate",
-  "estimatedDuration": 5,
-  "prerequisites": ["lesson-11"],
-  "sortOrder": 12
-}
+A7. Change communication mini-template
+Scenario: “About to change permissions.”
+Room: Simulator “Change summary” modal
+Steps:
+  1) Fill impact
+  2) Fill rollback
+  3) Fill owner
+  4) Confirm maintenance window (simulated)
 
+A8. Quick click-through tour of “rare but real” admin areas
+Room: Jira settings → System
+Steps:
+  1) Click-only: General config, Email, Integrations, Advanced settings, etc.
+  2) Tag areas: “common / occasional / rare”
 
-================================================================================
-MODULE C: BACKLOG MANAGEMENT (Lessons 13-18)
-================================================================================
+==========================================================================================
+B. IDENTITY & ACCESS (ATLASSIAN ADMIN) (10 lessons)
+==========================================================================================
 
-LESSON 13: Understanding the Backlog
-LESSON 14: Prioritizing Issues
-LESSON 15: Creating Sprints
-LESSON 16: Sprint Planning
-LESSON 17: Starting a Sprint
-LESSON 18: Completing a Sprint
+B1. Create a group + why groups ≠ permissions directly
+Scenario: “Create jira-contractors; grant controlled access later.”
+Room: Atlassian Admin → Directory → Groups
+Steps:
+  1) Create group
+  2) Add 2 users
+  3) Show note: groups are membership; access is mapped via roles/schemes
 
+B2. Default groups and product access effects
+Scenario: “Why did someone get Jira access?”
+Room: Groups → Default groups
+Steps:
+  1) View default groups
+  2) Identify implicit product access
 
-================================================================================
-MODULE D: ISSUE MANAGEMENT (Lessons 19-24)
-================================================================================
+B3. Grant product access (User access admin flow)
+Scenario: “New employee needs Jira + JSM agent, not admin.”
+Room: Directory → Users → Grant access
+Steps:
+  1) Select user
+  2) Grant access
+  3) Choose products
+  4) Save
 
-LESSON 19: Issue Types Deep Dive
-LESSON 20: Custom Fields
-LESSON 21: Issue Links
-LESSON 22: Subtasks
-LESSON 23: Epics
-LESSON 24: Labels and Components
+B4. Remove access safely (remove product vs deactivate)
+Scenario: “Offboarding — keep history.”
+Room: Directory → Users
+Steps:
+  1) Remove product access
+  2) Optionally deactivate account (simulated)
 
+B5. Controlled admin promotion
+Scenario: “Make someone Jira admin but not Org admin.”
+Room: Directory → Users → Admin roles
+Steps:
+  1) Assign Jira admin / site admin (as required)
+  2) Save
 
-================================================================================
-MODULE E: PROJECT ADMINISTRATION (Lessons 25-30)
-================================================================================
+B6. Diagnose “can’t browse users/groups” (Global permission)
+Scenario: “Service account fails user lookup.”
+Room: Jira settings → System → Global permissions
+Steps:
+  1) Find “Browse users and groups”
+  2) Add service group
+  3) Save
 
-LESSON 25: Project Settings Overview
-LESSON 26: Managing Team Access
-LESSON 27: Workflow Configuration
-LESSON 28: Notifications Setup
-LESSON 29: Automation Rules
-LESSON 30: Project Reporting
+B7. External vendor access pattern (roles + scheme)
+Scenario: “Vendor must see only one project.”
+Room: Jira settings → Work items → Permission schemes
+Steps:
+  1) Open target scheme
+  2) Ensure Browse Projects uses project role mapping
+  3) Save note: validate via permission helper (capstone)
 
+B8. Guest/anonymous concepts (Confluence + portals)
+Room: Confluence / JSM overview (read-only)
+Steps:
+  1) Compare guest vs anonymous vs licensed user
+  2) Identify safe patterns for KB and portals
 
-================================================================================
-LESSON STEP TEMPLATE
-================================================================================
+B9. Org audit log (Atlassian Admin)
+Scenario: “Who changed SSO/security?”
+Room: Atlassian Admin → Audit log
+Steps:
+  1) Filter by category
+  2) Open event
 
-Use this template for creating detailed steps:
+B10. Delegation matrix exercise
+Scenario: “4 admins — assign responsibilities.”
+Room: Role assignment board (drag-drop)
+Steps:
+  1) Drag responsibilities (identity, Jira config, JSM portal, Confluence KB, Assets) to roles
+  2) Confirm overlap rules
 
-{
-  "stepOrder": 1,
-  "narrationText": "Clear instruction under 15 words. What to do and why.",
-  "audioUrl": null,
-  "audioDuration": null,
-  "targetSelector": "[data-testid='element-id']",
-  "highlightStyle": "pulse",
-  "highlightColor": "#0052CC",
-  "expectedAction": "click",
-  "actionValue": null,
-  "delayAfterAudio": 300,
-  "allowSkip": true,
-  "hintOnWrongClick": "Helpful hint if user clicks wrong element.",
-  "validationType": "element_clicked",
-  "validationConfig": {},
-  "requiredSimulatorState": null,
-  "stateChangesAfter": null
-}
+==========================================================================================
+C. JIRA CORE CONFIGURATION (Jira settings → Work items) (18 lessons)
+==========================================================================================
 
-================================================================================
+C1. Add a new work type
+Scenario: “Create Security Review work type.”
+Room: Work items → Work types
+Steps: Add work type → Name/Description → Save
+
+C2. Create a work type scheme
+Scenario: “Only 6 work types allowed in Project X.”
+Room: Work items → Work type schemes
+Steps: Create scheme → Select work types → Set default → Reorder → Save
+
+C3. Associate a work type scheme to a project
+Scenario: “Project has wrong issue types.”
+Room: Work type schemes → Associate projects panel
+Steps: Select scheme → Associate → Choose project → Confirm
+
+C4. Manage work type screens (create/edit/view mapping)
+Scenario: “Show Risk level only on Security Review create screen.”
+Room: Work items → Screens / screen schemes / work type screen schemes
+Steps: Open work type screen scheme → Map screen to create/edit/view → Save
+
+C5. Custom field contexts (where a field appears)
+Scenario: “Field only for 2 projects + 1 work type.”
+Room: Work items → Fields → Field contexts
+Steps: Open field → Configure contexts → Select projects/work types → Save
+
+C6. “Required field” safely (field config scheme pattern)
+Scenario: “Make Business owner required only in one project.”
+Room: Work items → Field configuration schemes
+Steps: Copy scheme → Set field required → Associate to project
+
+C7. Permission schemes — create + scope
+Scenario: “Standardize internal project permissions.”
+Room: Work items → Permission schemes
+Steps: Create scheme → Open scheme details
+
+C8. Permission scheme — change one permission
+Scenario: “Allow Developers to transition issues.”
+Room: Permission scheme detail
+Steps: Find “Transition issues” → Update → Select Project Role → Save
+
+C9. Notification scheme quick setup
+Scenario: “Notify Security team on create.”
+Room: Work items → Notifications
+Steps: Copy scheme → Add event → Set recipients → Save
+
+C10. Workflow scheme — create
+Scenario: “Different workflow for Bugs vs Tasks.”
+Room: Work items → Workflows → Workflow schemes
+Steps: Create scheme → Map work types to workflows → Save
+
+C11. Workflow scheme — associate to a project
+Scenario: “Project must use new Bug workflow.”
+Room: Workflow scheme → Associate
+Steps: Associate → Choose project → Confirm (migration warning simulated)
+
+C12. Issue security scheme
+Scenario: “HR tickets visible only to HR + reporter.”
+Room: Work items → Issue security schemes
+Steps: Create scheme → Add levels → Set level members → Save
+
+C13. Global permissions review
+Scenario: “Reduce who can administer Jira.”
+Room: Jira settings → System → Global permissions
+Steps: Open Administer Jira → Remove broad groups → Add admin group only → Save
+
+C14. Cleanup playbook (Site optimizer)
+Scenario: “Too many schemes/fields — maintainability.”
+Room: Jira settings → System → Site optimizer
+Steps: Open recommendations → Mark candidates → Export list (simulated)
+
+C15. Rare-but-useful click-through (mail, events, integrations)
+Room: Jira settings → System
+Steps: Click-only tour + highlight typical use
+
+C16. Automation scope: global vs project
+Scenario: “Rule created in project doesn’t work elsewhere.”
+Room: Jira settings → System → Automation rules
+Steps: Switch tabs (global vs project rules) → Compare permissions
+
+C17. Export automation rules
+Scenario: “Migration / backup.”
+Room: Jira settings → System → Automation rules
+Steps: More (•••) → Export rules → Download JSON (simulated)
+
+C18. Audit log filter for scheme changes
+Scenario: “Who changed permissions yesterday?”
+Room: Jira settings → System → Audit log
+Steps: Filter → Open event → Identify actor
+
+==========================================================================================
+D. JIRA SERVICE MANAGEMENT ADMIN (Project settings) (16 lessons)
+==========================================================================================
+
+D1. Portal access / customer permissions
+Scenario: “Restrict portal to employees only.”
+Room: JSM project → Project settings → Customer permissions
+Steps: Set access rules → Save
+
+D2. Request types vs work types mapping (concept)
+Scenario: “Changing issue type broke portal form.”
+Room: Project settings → Request types (explainer panel)
+Steps: Show mapping relationships
+
+D3. Create request type
+Scenario: “Add New laptop request.”
+Room: Project settings → Request types
+Steps: Add request type → Choose underlying work type → Name/icon → Save
+
+D4. Portal groups organization
+Scenario: “Customers can’t find the right form.”
+Room: Project settings → Request types → Groups
+Steps: Create group → Drag request types → Save
+
+D5. Portal branding basics
+Scenario: “Match company branding for trust.”
+Room: Project settings → Portal settings
+Steps: Set logo/banner/colors (simulated) → Save
+
+D6. SLA calendar creation
+Scenario: “Pause SLA outside business hours.”
+Room: Project settings → SLAs → Calendars
+Steps: Add calendar → Set hours/holidays → Save
+
+D7. Create SLA metric (e.g., Time to first response)
+Scenario: “Define SLA for VIP incidents.”
+Room: Project settings → SLAs
+Steps: Add SLA → Start/stop conditions → Goals → Save
+
+D8. Queue design (triage queue)
+Scenario: “Unassigned + Breaching soon.”
+Room: Project settings → Queues
+Steps: New queue → JQL → Columns → Order → Save
+
+D9. Knowledge base connection (Confluence)
+Scenario: “Deflect tickets with articles.”
+Room: Project settings → Knowledge base
+Steps: Connect space → Set visibility → Save
+
+D10. JSM automation rule (simple routing)
+Scenario: “Auto-assign incidents by service/component.”
+Room: Project settings → Automation
+Steps: Trigger → Condition → Assign action → Publish
+
+D11. Automation debugging (rule audit log)
+Scenario: “Rule runs but does nothing.”
+Room: Project settings → Automation → Audit log
+Steps: Open run → inspect branch/conditions → identify failure point
+
+D12. Approvals concept (change management light)
+Scenario: “CAB approval required for Normal Change.”
+Room: Project workflow/approvals (simplified one-page)
+Steps: Add approval step (simulated) → Save
+
+D13. Email channel governance (what matters vs avoid)
+Scenario: “Customers email requests in.”
+Room: Channel settings overview (read-only)
+Steps: Identify safe configuration boundaries
+
+D14. Help Center / multiple portals (concept)
+Scenario: “One entry portal for IT + HR.”
+Room: Help Center settings (read-only)
+Steps: Click-through + show structure
+
+D15. ITIL templates awareness
+Scenario: “Which template fits process maturity?”
+Room: Template chooser (read-only)
+Steps: Compare incident/problem/change templates
+
+D16. Project settings sidebar orientation
+Room: JSM project settings sidebar map (read-only)
+Steps: Click sections → see typical admin tasks per section
+
+==========================================================================================
+E. ASSETS (JSM / “Assets” formerly Insight) ADMIN (12 lessons)
+==========================================================================================
+
+E1. Create an object schema
+Scenario: “Separate HR assets from IT assets.”
+Room: Assets → Object schemas
+Steps: Create schema → Name/key → Save
+
+E2. Create object types
+Scenario: “Model Laptops and Employees.”
+Room: Schema → Object types
+Steps: Add object type → Icon → Save
+
+E3. Add attributes (text/select/reference)
+Scenario: “Laptop: Serial, Model, Owner(ref).”
+Room: Object type → Attributes
+Steps: Add attributes → Required/indexing → Save
+
+E4. Roles/permissions on a schema
+Scenario: “Only ITAM team can edit objects.”
+Room: Schema → Configure → Roles
+Steps: Add role → Assign group/users → Save
+
+E5. Import configuration (from external system)
+Scenario: “Sync devices from another system.”
+Room: Schema → Configure → Import
+Steps: Create import → Map types → Schedule sync → Save
+
+E6. Validate import results
+Scenario: “Objects missing after import.”
+Room: Import status panel
+Steps: Check mapping → Errors → Rerun (simulated)
+
+E7. Assets automation rule
+Scenario: “When Owner changes, update Department.”
+Room: Schema → Configure → Automation
+Steps: Create rule → Event → Condition → Action → Save
+
+E8. Reference Assets from Jira issues (Assets custom field)
+Scenario: “Incident must link affected device.”
+Room: Jira settings → Work items → Custom fields
+Steps: Add Assets field → Set context → Add to screen → Save
+
+E9. AQL basics (admin-level)
+Scenario: “Find laptops expiring in 90 days.”
+Room: Assets search
+Steps: Build AQL using hints → Run → Save filter (simulated)
+
+E10. CI lifecycle statuses (optional)
+Scenario: “Retired assets shouldn’t be selectable.”
+Room: Schema config → Statuses
+Steps: Add status → Adjust selection rules → Save
+
+E11. Finding IDs (schema/objectType IDs) for API/automation
+Scenario: “Need IDs for middleware.”
+Room: Object schema detail header (simulated)
+Steps: Locate schema ID and object type ID display
+
+E12. Assets admin click-through of lesser-used tabs
+Room: Schema “Configure” tabs
+Steps: Tour: Imports/Roles/Automation/Settings
+
+==========================================================================================
+F. CONFLUENCE ADMIN (for JSM knowledge base) (8 lessons)
+==========================================================================================
+
+F1. Global permissions
+Scenario: “Only employees can access Confluence.”
+Room: Confluence admin → Global permissions
+Steps: Review licensed/guest/anonymous → Update → Save
+
+F2. Space permissions
+Scenario: “Customers can view KB articles but not edit.”
+Room: Space settings → Permissions
+Steps: Grant view group → Remove create/edit → Save
+
+F3. Delegate space admin
+Scenario: “Service Desk leads manage KB content.”
+Room: Space permissions
+Steps: Grant admin to group → Save
+
+F4. Public links governance
+Scenario: “Prevent accidental public sharing.”
+Room: Confluence admin → Public links
+Steps: Disable / restrict (simulated) → Save
+
+F5. KB quality checklist
+Room: Read-only checklist
+Content: structure, ownership, review dates, labels, deflection intent
+
+F6. JSM ↔ Confluence visibility alignment
+Scenario: “Agents see drafts; customers see published.”
+Room: JSM Knowledge base settings (read-only)
+Steps: Inspect visibility rules
+
+F7. Article template guidance
+Room: Template chooser (read-only)
+Steps: Choose “How-to” vs “Troubleshooting” templates
+
+F8. Confluence admin menu tour
+Room: Confluence admin overview
+Steps: Click-only tour of common settings
+
+==========================================================================================
+ADMIN CAPSTONE (OPTIONAL): 6 REAL-LIFE INCIDENTS (multi-lesson, each still one room)
+==========================================================================================
+
+Capstone 1: “VIP users can’t create incidents.” (Portal access / permissions)
+Capstone 2: “New request form missing fields.” (Screens + request type mapping)
+Capstone 3: “Automation runs but can’t edit global rules.” (Global permissions / automation scope)
+Capstone 4: “Audit what changed yesterday.” (Audit log)
+Capstone 5: “Assets object not selectable.” (Schema permissions/status)
+Capstone 6: “KB not showing.” (JSM KB link + Confluence permissions)
+
+------------------------------------------------------------------------------------------
+TRACK 2: PROGRAMMER (Jira/Atlassian Cloud) — 8 COMMON CODING TASKS
+------------------------------------------------------------------------------------------
+
+1) Forge: Jira workflow validator
+   - Build a validator that blocks a transition unless a Jira expression/condition passes; add small config UI.
+
+2) Forge: Custom UI issue panel + resolver
+   - Display issue metadata and call Jira REST via resolver; persist user preferences with Forge storage.
+
+3) Forge: Web trigger endpoint
+   - Create a webtrigger to accept external POSTs, validate signature, and create/update Jira issues.
+
+4) OAuth 2.0 (3LO) integration (middleware service)
+   - Implement auth code flow; store tokens; call Jira REST v3 on behalf of users; handle scopes and refresh.
+
+5) API token Basic Auth service integration
+   - Implement server-to-server integration using API token; include pagination + rate limit handling.
+
+6) Automation + webhook receiver
+   - Build an endpoint receiving Jira Automation webhooks; deduplicate events; call back Jira REST to update fields/status.
+
+7) ScriptRunner for Jira Cloud: Script Listener
+   - React to issue updated events and enrich data or comment; include guard conditions to avoid loops.
+
+8) ScriptRunner: Script Fragment button
+   - Add a UI button to run a script such as “Escalate to Security” that labels + transitions + notifies.
+
+------------------------------------------------------------------------------------------
+TRACK 3: CONSULTANT (BUSINESS-FACING) — QUIZ BANK (20 QUESTIONS)
+------------------------------------------------------------------------------------------
+
+Format: A/B/C answers. One is best. Marked with ✅. Distractors are plausible.
+
+Q1. “We need 200 projects because every team wants their own.”
+A) Create all 200 projects; customize later.
+B) Propose a template + scaling model; create projects only when boundaries differ; otherwise use components/boards. ✅
+C) Create one mega-project with 200 workflows.
+
+Q2. “Executives want a single status model across all teams.”
+A) Enforce one workflow everywhere.
+B) Align reporting statuses while allowing team workflows; standardize metrics not every transition. ✅
+C) Add more statuses so everyone fits.
+
+Q3. “We want approvals for everything.”
+A) Add approvals to every step.
+B) Define risk tiers; approvals only where decisions matter; automate checks elsewhere. ✅
+C) Put approvals only in Confluence.
+
+Q4. “Customers should email tickets, but security is strict.”
+A) Enable email channel and allow anyone.
+B) Define channel access + identity controls; prevent loops/spoofing; align portal/email permissions with audit needs. ✅
+C) Disable email entirely.
+
+Q5. “We need a CMDB in Assets by next month.”
+A) Import everything first.
+B) Start with use-cases; minimal schema; data owners; quality rules; iterate. ✅
+C) Copy ITIL tables exactly.
+
+Q6. “Restrict a vendor to one project only.”
+A) Add them to Jira users group and trust it.
+B) Use dedicated role/group model; map Browse Projects via project role; validate with permission check. ✅
+C) Give them Administer Project.
+
+Q7. “Automation everywhere, admins fear chaos.”
+A) Let every project admin create any rule.
+B) Set governance: naming, ownership, logging, safe components, review process for global rules; promote patterns. ✅
+C) Ban automation; use scripts only.
+
+Q8. “One help center for IT + HR, but HR is confidential.”
+A) Merge into one service project.
+B) One help-center entry, separate service projects + permissions; ensure HR isolation via perms/issue security. ✅
+C) Put HR into Jira Software projects.
+
+Q9. “Reporting inconsistent across projects.”
+A) Force same custom fields everywhere immediately.
+B) Define canonical reporting layer + stewardship; map local fields gradually; avoid breaking teams. ✅
+C) Use spreadsheets only.
+
+Q10. “Users complain Jira is slow.”
+A) Buy more apps.
+B) Review scale drivers (fields, schemes, automations, perms complexity) and clean up; measure before/after. ✅
+C) Delete old issues.
+
+Q11. “SOX compliance — track changes.”
+A) Tell people to comment more.
+B) Restrict admin roles; audit log review; change requests for config; evidence capture. ✅
+C) Export to Excel weekly.
+
+Q12. “Need a new workflow tomorrow.”
+A) Do it in prod quickly.
+B) Clarify success criteria, impacted users, rollout/rollback; check whether scheme affects multiple projects; implement safely. ✅
+C) Refuse—workflows never change.
+
+Q13. “Can Jira do X?”
+A) Say yes always.
+B) Reframe to outcomes/constraints; propose options (native/automation/app/process) with tradeoffs. ✅
+C) Say no unless done before.
+
+Q14. “Departments fight over field definitions.”
+A) Let both create duplicate fields.
+B) Establish stewardship; shared fields with controlled contexts/options; local fields only when justified. ✅
+C) Rename fields to hide duplicates.
+
+Q15. “Measure team performance by ticket counts.”
+A) Agree; counts are objective.
+B) Challenge metric; propose outcome metrics (cycle time, SLA, CSAT) and avoid perverse incentives. ✅
+C) Replace with story points only.
+
+Q16. “Automate assignment using AI.”
+A) Install an AI app immediately.
+B) Start rules-based routing + data hygiene; evaluate AI where explainable/auditable and actually improves decisions. ✅
+C) Never use AI.
+
+Q17. “Let every team customize everything.”
+A) No standards needed.
+B) Guardrails: standard templates/schemes, controlled variation at project level, exception request process. ✅
+C) Force everyone into one shared project.
+
+Q18. “We want a simple permission model.”
+A) Use groups everywhere.
+B) Use roles + scheme patterns; keep groups for identity; document role meaning for business. ✅
+C) Give everyone Browse Project and rely on issue security.
+
+Q19. “They want one workflow but different processes.”
+A) Impossible; choose one.
+B) Shared backbone workflow with conditional paths OR separate workflows per work type inside a scheme; align reporting states. ✅
+C) Add more statuses until it fits.
+
+Q20. “CMDB import before any ticket field changes.”
+A) Yes — data first always.
+B) Pilot minimal CI set + one request type; prove value; expand; avoid boiling the ocean. ✅
+C) Skip Assets; use labels.
